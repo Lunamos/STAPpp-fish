@@ -10,4 +10,3 @@ STAP++ is developed and maintained by the Computational Dynamics Laboratory (htt
 
 The documentation of STAP++ can be found at https://xzhang66.github.io/stappp/index.html.
 
-xxx
