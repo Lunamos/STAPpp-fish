@@ -24,3 +24,22 @@ enum ElementTypes
 };
 ```
 Use these enum as element name.
+
+4. Add material members in Materials.h. Material geometry specs like moment of inertia. 
+
+5. Modify Outputter and add class OutputBeamElements from base class.
+
+6. Add outputter for beam element in Outputter.cpp 
+```
+void COutputter::OutputBeamElements(unsigned int EleGrp)
+{
+...
+}
+void COutputter::OutputElementStress()
+{
+    ...
+    case ElementTypes::Beam: // beam element
+    ...
+}
+
+```
