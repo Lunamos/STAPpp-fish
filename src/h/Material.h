@@ -52,3 +52,25 @@ public:
 //!	Write material data to Stream
 	virtual void Write(COutputter& output);
 };
+
+
+// Material class for beam element
+class CBeamMaterial : public CMaterial
+{
+public:
+
+	double Area;	//!< Sectional area of a bar element
+	double Iz;		//!< Moment of inertia about z-axis, parallel to the global y-z plane
+	double Iy;		//!< Moment of inertia about y-axis, parallel to the global x-y plane
+	//double Ip;		//!< Polar moment of inertia
+	double v;		//!< Poisson's ratio
+	//double G;		//!< Shear modulus
+
+public:
+	
+//!	Read material data from stream Input
+	virtual bool Read(ifstream& Input);
+
+//!	Write material data to Stream
+	virtual void Write(COutputter& output);
+};
