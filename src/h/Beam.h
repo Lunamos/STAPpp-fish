@@ -14,7 +14,7 @@
 
 using namespace std;
 
-//! Bar element class
+//! Beam element class
 class CBeam : public CElement
 {
 protected:
