@@ -59,12 +59,16 @@ class CBeamMaterial : public CMaterial
 {
 public:
 
-	double Area;	//!< Sectional area of a bar element
-	double Iz;		//!< Moment of inertia about z-axis, parallel to the global y-z plane
-	double Iy;		//!< Moment of inertia about y-axis, parallel to the global x-y plane
-	//double Ip;		//!< Polar moment of inertia
+	double Area;	//!< Sectional area of a beam element
+
+	//! Define the principal axis of inertia of the section by giving the normalized vector of the y-axis
+	double y_axis[3];	//!< Normalized vector of the y-axis of the section respect to the global coordinate system
+						// MUST BE PERPENDICULAR TO THE AXIS OF THE BEAM ELEMENT
+	double Iz;		//!< Moment of inertia about z-axis
+	double Iy;		//!< Moment of inertia about y-axis
+					//!< Iyz must be zero, the local coordinate must be Inertia Principal Axis System
+	double Jp;		//!< Torsional constant
 	double v;		//!< Poisson's ratio
-	//double G;		//!< Shear modulus
 
 public:
 	
