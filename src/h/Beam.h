@@ -17,6 +17,10 @@ using namespace std;
 //! Bar element class
 class CBeam : public CElement
 {
+protected:
+// Transform matrix between local inertia principal coordinate system and global
+	double** T_;
+
 public:
 
 //!	Constructor
@@ -36,4 +40,7 @@ public:
 
 //!	Calculate element stress
 	virtual void ElementStress(double* stress, double* Displacement);
+
+//! Calculate Transform matrix
+	void CalculateTransformMatrix();
 };

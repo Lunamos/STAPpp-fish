@@ -26,6 +26,8 @@ CBeam::CBeam()
     LocationMatrix_ = new unsigned int[ND_];
 
 	ElementMaterial_ = nullptr;
+
+	T_ = new double* [12];
 }
 
 //	Desconstructor
@@ -73,45 +75,19 @@ void CBeam::ElementStiffness(double* Matrix)
 	double L = sqrt(DX[0] * DX[0] + DX[1] * DX[1] + DX[2] * DX[2]);	//	Beam length
 	double Lxy = sqrt(DX2[0] + DX2[1]);	//	Beam length projected on x'y' plane
 	
-// set a local coordinates xyz with y axis parallel to the global x'O'y' plane
-	double x[3]={0}; // x axis unit vector
-	double y[3]={0}; // y axis unit vector
-	double z[3]={0}; // z axis unit vector
+// Geometry properties of the beam element
+	CBeamMaterial* material_ = dynamic_cast<CBeamMaterial*>(ElementMaterial_);	// Pointer to material of the element
+
+	double k = material_->E * material_->Area / L; //coefficient for stiffness matrix
+	double G = material_->E / 2 / (1 + material_->v);
+
+
 
 // transform matrix from local to global coordinates
-//(12 * 12 matrix, but only store the left upper corner)
-	double T_block[3][3]={0};
-
-	T_block[0][0] = x[0] = DX[0] / L;
-	T_block[0][1] = x[1] = DX[1] / L;
-	T_block[0][2] = x[2] = DX[2] / L;
-
-	T_block[1][1] = y[1] = x[0] / Lxy;
-	T_block[1][0] = y[0] = -x[1] * y[1] / x[0];
-	T_block[1][2] = y[2] = 0;
-
-	T_block[2][0] = z[0] = x[1] * y[2] - x[2] * y[1];
-	T_block[2][1] = z[1] = x[2] * y[0] - x[0] * y[2];
-	T_block[2][2] = z[2] = x[0] * y[1] - x[1] * y[0];
-	
-	// Assemble the global transformation matrix T from T_block
-    double T[12][12] = {0};
-
-    for (unsigned int blockIdx = 0; blockIdx < 12 / 3; ++blockIdx) {
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                T[blockIdx * 3 + i][blockIdx * 3 + j] = T_block[i][j];
-            }
-        }
-    }
+	CalculateTransformMatrix();
 
 //	Calculate element stiffness matrix respect to local coordinate
 
-	CBeamMaterial* material_ = dynamic_cast<CBeamMaterial*>(ElementMaterial_);	// Pointer to material of the element
-
-	double k = material_->E * material_->Area / L;
-	double Ip = sqrt(material_->Iz + material_->Iy);
-	double G = material_->E / 2 / (1 + material_->v);
 
 	// element stiffness matrix in LOCAL COORDINATES
 	double ke[12][12] = {0};
@@ -128,8 +104,8 @@ void CBeam::ElementStiffness(double* Matrix)
 	ke[2][8] = -12 * material_->E * material_->Iy / (L * L * L);	
 	ke[2][10] = -6 * material_->E * material_->Iy / (L * L);
 
-	ke[3][3] = G * Ip / L;	
-	ke[3][9] = -G * Ip / L;
+	ke[3][3] = G * material_->Jp / L;	
+	ke[3][9] = -G * material_->Jp / L;
 
 	ke[4][2] = -6 * material_->E * material_->Iy / (L * L);
 	ke[4][4] = 4 * material_->E * material_->Iy / L;
@@ -154,8 +130,8 @@ void CBeam::ElementStiffness(double* Matrix)
 	ke[8][8] = 12 * material_->E * material_->Iy / (L * L * L);
 	ke[8][10] = 6 * material_->E * material_->Iy / (L * L);
 
-	ke[9][3] = -G * Ip / L;
-	ke[9][9] = G * Ip / L;
+	ke[9][3] = -G * material_->Jp / L;
+	ke[9][9] = G * material_->Jp / L;
 
 	ke[10][2] = -6 * material_->E * material_->Iy / (L * L);
 	ke[10][4] = 2 * material_->E * material_->Iy / L;
@@ -183,20 +159,18 @@ void CBeam::ElementStiffness(double* Matrix)
     double Ke_global[12][12] = {0};
 
     // Perform the multiplication T^T * Ke * T to get the global coordinate stiffness matrix
-	unsigned int count;
     for (int i = 0; i < 12; ++i) {
         for (int j = 0; j < 12; ++j) {
             for (int k = 0; k < 12; ++k) {
                 for (int l = 0; l < 12; ++l) {
-                    Ke_global[i][j] += T[k][i] * ke[k][l] * T[l][j];
+                    Ke_global[i][j] += T_[k][i] * ke[k][l] * T_[l][j];
                 }
             }
-			Matrix[count++] = Ke_global[i][j];
         }
     }
 	
 	// Store Ke_global to Matrix column by column as it's not a sparse matrix
-	int count = 0;
+	unsigned int count = 0;
 	for (unsigned int j = 0; j < 12 ; j++)
 	{
 		for (int i = j; i >= 0; i--)
@@ -214,13 +188,24 @@ void CBeam::ElementStress(double* stress, double* Displacement)
 	Description:
 		Funtion calculating the normal stress and bending moment of a beam element.
 	Variables:
-		* stress[0] = N
-		* stress[1] = My1
-		* stress[2] = Mz1
-
+		* stress[0] = N_stress_1		Normal stress at the center of inertia of the section (for linear beam, its constant along x axis)
+		* stress[1] = Tx_1		Torsional moment at gauss point 1
+		* stress[2] = My_1		Bending moment about the local y-axis at guass point 1
+		* stress[3] = My_2		Bending	moment about the local y-axis at guass point 2
+		* stress[4] = Mz_1		Bending moment about the local z-axis at gauss point 1
+		* stress[5] = Mz_2		Bending moment about the local z-axis at gauss point 2
+		* stress[6] = S_y_1		Shear force along the local y-axis (for linear beam, shear force distribution is cosntant along x axis)
+		* stress[7] = s_y_2		Shear force along the local z-axis
 	*/
 	CBeamMaterial* material_ = dynamic_cast<CBeamMaterial*>(ElementMaterial_);	// Pointer to material of the element
 
+	if (sizeof(stress) / sizeof(stress[0]) < 10)
+	{
+		cout << "Error: stress array for beam stress calculation size is not enough ( <10 )" << endl;
+		return;
+	}
+
+	// Calculate beam length
 	double DX[3];	//	dx = x2-x1, dy = y2-y1, dz = z2-z1
 	double L2 = 0;	//	Square of bar length (L^2)
 
@@ -229,19 +214,112 @@ void CBeam::ElementStress(double* stress, double* Displacement)
 		DX[i] = nodes_[1]->XYZ[i] - nodes_[0]->XYZ[i];
 		L2 = L2 + DX[i]*DX[i];
 	}
+	double L = sqrt(L2);	//	Beam length
 
-	// cos and sin of the angle for the transform from local to global coordinates.
-	double S[6];
-	for (unsigned int i = 0; i < 3; i++)
-	{
-		S[i] = -DX[i] * material_->E / L2;
-		S[i+3] = -S[i];
-	}
-	
-	stress[0] = 0.0;
-	for (unsigned int i = 0; i < 6; i++)
+	// Calculate local x coordinate for gauss point 1 and 2
+	double x_gp[2] = {(-3 / sqrt(3) + 1) * L / 2, (3 / sqrt(3) + 1) * L / 2};
+
+	// Gather local displacements
+	double de[12] = {0};
+	for (unsigned int i = 0; i < 12; i ++)
 	{
 		if (LocationMatrix_[i])
-			*stress += S[i] * Displacement[LocationMatrix_[i]-1];
+			de[i] = Displacement[LocationMatrix_[i]-1];
+	} 
+	
+	// Transfer de to local coordinates (T * de)
+	double de_local[12] = {0};
+	for (unsigned int i = 0; i < 12; i++)
+	{
+		for (unsigned int j = 0; j < 12; j++)
+		{
+			de_local[i] += T_[i][j] * de[j];
+		}
 	}
+
+	// Calculate stress elements
+	stress[0] =  material_->E * (de_local[6] - de_local[0]) / L; // stress due to axial force is constant for linear beam
+	
+	stress[1] = (material_->Jp * material_->E / 2 / (1 + material_->v) ) * (de_local[9] - de_local[3]) / L; // Torsional moment
+	
+	stress[2] = ( material_->Iy * material_->E / L2 / L) * 
+					( (-12 * x_gp[0] + 6 * L) * de_local[2] + ( 6 * x_gp[0] * L - 4 * L2) * de_local[4] + 
+					  ( 12 * x_gp[0] - 6 * L) * de_local[8] + ( 6 * x_gp[0] * L - 2 * L2) * de_local[10] );
+	stress[3] = ( material_->Iy * material_->E / L2 / L) * 
+					( (-12 * x_gp[1] + 6 * L) * de_local[2] + ( 6 * x_gp[1] * L - 4 * L2) * de_local[4] + 
+					  ( 12 * x_gp[1] - 6 * L) * de_local[8] + ( 6 * x_gp[1] * L - 2 * L2) * de_local[10] );
+
+	stress[4] = (-material_->Iz * material_->E / L2 / L) * 
+					( (-12 * x_gp[0] + 6 * L) * de_local[1] + (-6 * x_gp[0] * L + 4 * L2) * de_local[5] + 
+					  ( 12 * x_gp[0] - 6 * L) * de_local[7] + (-6 * x_gp[0] * L + 2 * L2) * de_local[11] );
+	stress[5] = (-material_->Iz * material_->E / L2 / L) * 
+					( (-12 * x_gp[1] + 6 * L) * de_local[1] + (-6 * x_gp[1] * L + 4 * L2) * de_local[5] + 
+					  ( 12 * x_gp[1] - 6 * L) * de_local[7] + (-6 * x_gp[1] * L + 2 * L2) * de_local[11] );
+
+	stress[6] = (material_->Iz * material_->E / L2 / L) * 
+				(-12 * de_local[1] - 6 * L * de_local[5] + 12 * de_local[7] - 6 * L * de_local[11]);
+	stress[7] = (material_->Iy * material_->E / L2 / L) * 
+				(-12 * de_local[2] + 6 * L * de_local[4] + 12 * de_local[8] - 6 * L * de_local[10]);
+
+}
+
+
+
+
+
+// Calculate transform matrix
+void CBeam::CalculateTransformMatrix()
+{
+	// Calculate beam length
+	double DX[3];		//	dx = x2-x1, dy = y2-y1, dz = z2-z1
+	for (unsigned int i = 0; i < 3; i++)
+		DX[i] = nodes_[1]->XYZ[i] - nodes_[0]->XYZ[i];
+
+	double DX2[3];	//  Quadratic polynomial (dx^2, dy^2, dz^2)
+	DX2[0] = DX[0] * DX[0];
+	DX2[1] = DX[1] * DX[1];
+	DX2[2] = DX[2] * DX[2];
+
+	double L = sqrt(DX[0] * DX[0] + DX[1] * DX[1] + DX[2] * DX[2]);	//	Beam length
+
+	
+// Geometry properties of the beam element
+	CBeamMaterial* material_ = dynamic_cast<CBeamMaterial*>(ElementMaterial_);	// Pointer to material of the element
+
+// set a local coordinates xyz by the principal y axis of inertia
+	/*
+		local coordinate xyz is inertia principal axis system
+		z axis is generated by the cross product of the principal y axis and the beam axis, 
+		it is parallel to the principle z axis of inertia but may not the one because of the origin. 
+		But this does not matter when we only consider the angle between z and global axes.
+	*/
+	double x[3] = { 0 }; // x axis unit vector
+	double y[3] = { 0 }; // y axis unit vector
+	double z[3] = { 0 }; // z axis unit vector
+
+	// transform matrix from local to global coordinates
+	//(12 * 12 matrix, but only store the left upper corner)
+	double T_block[3][3]={0};
+
+	T_block[0][0] = x[0] = DX[0] / L;
+	T_block[0][1] = x[1] = DX[1] / L;
+	T_block[0][2] = x[2] = DX[2] / L;
+
+	T_block[1][0] = y[0] = material_->y_axis[0];
+	T_block[1][1] = y[1] = material_->y_axis[1];
+	T_block[1][2] = y[2] = material_->y_axis[2];
+
+	// Cross product to get the z axis
+	T_block[2][0] = z[0] = x[1] * y[2] - x[2] * y[1];
+	T_block[2][1] = z[1] = x[2] * y[0] - x[0] * y[2];
+	T_block[2][2] = z[2] = x[0] * y[1] - x[1] * y[0];
+	
+	// Assemble the global transformation matrix T from T_block
+    for (unsigned int blockIdx = 0; blockIdx < 12 / 3; ++blockIdx) {
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                T_[blockIdx * 3 + i][blockIdx * 3 + j] = T_block[i][j];
+            }
+        }
+    }
 }
