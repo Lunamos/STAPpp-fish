@@ -326,6 +326,7 @@ void COutputter::OutputElementStress()
 		switch (ElementType)
 		{
 			case ElementTypes::Bar: // Bar element
+			{	
 				*this << "  ELEMENT             FORCE            STRESS" << endl
 					<< "  NUMBER" << endl;
 
@@ -344,8 +345,9 @@ void COutputter::OutputElementStress()
 				*this << endl;
 
 				break;
-
+			}
 			case ElementTypes::Beam: //Beam element
+			{
 				*this << "  ELEMENT             STRESS             TORSION             MOMENT_Y_1             MOMENT_Y_2             MOMENT_Z_1             MOMENT_Z_2             SHEAR_Y             SHEAR_Z" << endl //to be determined
 					<< "  NUMBER" << endl;
 
@@ -364,13 +366,13 @@ void COutputter::OutputElementStress()
 						  << stressBeam << endl; // to be determined
 					
 				}
+			
+				delete[] stressBeam;
 
 				*this << endl;
 
 				break;
-
-
-
+			}
 			default: // Invalid element type
 				cerr << "*** Error *** Elment type " << ElementType
 					<< " has not been implemented.\n\n";
