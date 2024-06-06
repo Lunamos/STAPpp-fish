@@ -149,6 +149,7 @@ void COutputter::OutputElementInfo()
 			  << ElementType << endl;
 		*this << "     EQ.1, TRUSS ELEMENTS" << endl
 			  << "     EQ.2, ELEMENTS CURRENTLY" << endl
+			  << "     EQ.5, BEAM ELEMENTS" << endl
 			  << "     EQ.3, NOT AVAILABLE" << endl
 			  << endl;
 
@@ -163,6 +164,7 @@ void COutputter::OutputElementInfo()
 				break;
 			case ElementTypes::Beam: // Beam element
 				OutputBeamElements(EleGrp);
+				break;
 		    default:
 		        *this << ElementType << " has not been implemented yet." << endl;
 		        break;

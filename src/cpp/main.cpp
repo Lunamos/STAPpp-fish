@@ -68,10 +68,8 @@ int main(int argc, char *argv[])
 //  DiagonalAddress and StiffnessMatrix, and calculate the column heights
 //  and address of diagonal elements
 	FEMData->AllocateMatrices();
-    
 //  Assemble the banded gloabl stiffness matrix
 	FEMData->AssembleStiffnessMatrix();
-    
     double time_assemble = timer.ElapsedTime();
 
 //  Solve the linear equilibrium equations for displacements

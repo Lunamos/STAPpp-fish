@@ -17,11 +17,10 @@ using namespace std;
 //! Beam element class
 class CBeam : public CElement
 {
-protected:
+public:
+
 // Transform matrix between local inertia principal coordinate system and global
 	double** T_;
-
-public:
 
 //!	Constructor
 	CBeam();

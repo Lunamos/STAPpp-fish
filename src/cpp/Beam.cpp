@@ -27,12 +27,26 @@ CBeam::CBeam()
 
 	ElementMaterial_ = nullptr;
 
-	T_ = new double* [12];
+	T_ = new double*[12];
+    for (unsigned int i = 0; i < 12; ++i) {
+        T_[i] = new double[12]();
+    }
 }
 
 //	Desconstructor
 CBeam::~CBeam()
 {
+	if (T_) 
+	{
+        for (unsigned int i = 0; i < 12; ++i) 
+		{
+            delete[] T_[i];
+        }
+        delete[] T_;
+    }
+
+    delete[] nodes_;
+    delete[] LocationMatrix_;
 }
 
 //	Read element data from stream Input
@@ -313,11 +327,14 @@ void CBeam::CalculateTransformMatrix()
 	T_block[2][0] = z[0] = x[1] * y[2] - x[2] * y[1];
 	T_block[2][1] = z[1] = x[2] * y[0] - x[0] * y[2];
 	T_block[2][2] = z[2] = x[0] * y[1] - x[1] * y[0];
-	
+
 	// Assemble the global transformation matrix T from T_block
-    for (unsigned int blockIdx = 0; blockIdx < 12 / 3; ++blockIdx) {
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
+    for (unsigned int blockIdx = 0; blockIdx < 12 / 3; ++blockIdx) 
+	{
+        for (int i = 0; i < 3; ++i) 
+		{
+            for (int j = 0; j < 3; ++j) 
+			{
                 T_[blockIdx * 3 + i][blockIdx * 3 + j] = T_block[i][j];
             }
         }
