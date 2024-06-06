@@ -162,6 +162,7 @@ void CBeam::ElementStiffness(double* Matrix)
 			ke[j][i] = ke[i][j];
 		}
 	}	
+	
 
 
 
@@ -180,6 +181,7 @@ void CBeam::ElementStiffness(double* Matrix)
         }
     }
 	
+
 	// Store Ke_global to Matrix column by column as it's not a sparse matrix
 	unsigned int count = 0;
 	for (unsigned int j = 0; j < 12 ; j++)
@@ -190,6 +192,49 @@ void CBeam::ElementStiffness(double* Matrix)
 		}
 	}
 
+#ifdef _DEBUG_
+	// print transform matrix T_
+	std::cout << "Transform matrix" << std::endl << std::endl;
+	for (unsigned int i = 0; i < 12; i++)
+	{
+		for (unsigned int j = 0; j < 12; j++)
+		{
+			std::cout << T_[i][j] << ' ';
+		}
+		std::cout << std::endl;
+	}
+	// print local stiffness matrix ke
+	std::cout << "Local stiffness matrix" << std::endl << std::endl;
+	for (unsigned int i = 0; i < 12; i++)
+	{
+		for (unsigned int j = 0; j < 12; j++)
+		{
+			std::cout << ke[i][j] << ' ';
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+
+	// print global stiffness matrix Ke_global
+	std::cout << "Global stiffness matrix" << std::endl << std::endl;
+	for (unsigned int i = 0; i < 12; i++)
+	{
+		for (unsigned int j = 0; j < 12; j++)
+		{
+			std::cout << Ke_global[i][j] << ' ';
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+
+	// print Matrix
+	std::cout << "Matrix" << std::endl << std::endl;
+	for (unsigned int i = 0; i < 66; i++)
+	{
+		std::cout << Matrix[i] << ' ';
+	}
+	std::cout << std::endl;
+#endif
 }
 
 //	Calculate element stress 

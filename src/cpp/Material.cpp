@@ -30,7 +30,7 @@ bool CBeamMaterial::Read(ifstream& Input)
 {
 	Input >> nset;	// Number of property set
 
-	Input >> E >> Area >> Iz >> Iy >> Jp >> v;	// Young's modulus and section area, moment of inertia, Poisson's ratio
+	Input >> E >> Area >> Iz >> Iy >> Jp >> v >> y_axis[0] >> y_axis[1] >> y_axis[2];	// Young's modulus and section area, moment of inertia, Poisson's ratio
 
 	return true;
 }
@@ -45,7 +45,7 @@ void CBarMaterial::Write(COutputter& output)
 void CBeamMaterial::Write(COutputter& output)
 {
 	output << setw(16) << E << setw(16) << Area << setw(16) << Iz
-		   << Iy << setw(16) << Jp << setw(16) << v
+		   << Iy << setw(16) << Jp << setw(16) << v << y_axis[0] << y_axis[1] << y_axis[2]
 		   << endl;
 }
 

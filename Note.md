@@ -58,3 +58,8 @@ TODO::
 !!!!!! VERY IMPORTANT !!!!!!!
 Ip of beam is not Iy^2 + Iz^2, see strucural mechanices page 75
 Jp must be input
+VECTOR OF PRINCIPAL COORDINATE OF INERTIA OF SECTION MUST BE INPUT
+
+
+9. Write a input file document.
+
