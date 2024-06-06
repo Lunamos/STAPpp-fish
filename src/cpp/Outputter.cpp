@@ -161,6 +161,8 @@ void COutputter::OutputElementInfo()
 			case ElementTypes::Bar: // Bar element
 				OutputBarElements(EleGrp);
 				break;
+			case ElementTypes::Beam: // Beam element
+				OutputBeamElements(EleGrp);
 		    default:
 		        *this << ElementType << " has not been implemented yet." << endl;
 		        break;
@@ -213,6 +215,51 @@ void COutputter::OutputBarElements(unsigned int EleGrp)
 	*this << endl;
 }
 
+//	Output beam element data
+void COutputter::OutputBeamElements(unsigned int EleGrp)
+{
+	CDomain* FEMData = CDomain::GetInstance();
+
+	CElementGroup& ElementGroup = FEMData->GetEleGrpList()[EleGrp];
+	unsigned int NUMMAT = ElementGroup.GetNUMMAT();
+
+	*this << " M A T E R I A L   D E F I N I T I O N" << endl
+		  << endl;
+	*this << " NUMBER OF DIFFERENT SETS OF MATERIAL" << endl;
+	*this << " AND CROSS-SECTIONAL  CONSTANTS  . . . .( NPAR(3) ) . . =" << setw(5) << NUMMAT
+		  << endl
+		  << endl;
+
+	*this << "  SET       YOUNG'S     CROSS-SECTIONAL     MOMENT OF INERTIA     MOMENT OF INERTIA      MOMENT OF INERTIA     POISSON" << endl
+		  << " NUMBER     MODULUS          AREA             ABOUT Z AXIS      	  ABOUT Y AXIS		   		 POLAR        	  RATIO" << endl
+		  << "               E              A					Iz					  Iy				 	   Jp		        v" << endl;
+
+	*this << setiosflags(ios::scientific) << setprecision(5);
+
+	//	Loop over for all property sets
+	for (unsigned int mset = 0; mset < NUMMAT; mset++)
+    {
+        *this << setw(5) << mset+1;
+		ElementGroup.GetMaterial(mset).Write(*this);
+    }
+
+	*this << endl << endl
+		  << " E L E M E N T   I N F O R M A T I O N" << endl;
+    
+	*this << " ELEMENT     NODE     NODE       MATERIAL" << endl
+		  << " NUMBER-N      I        J       SET NUMBER" << endl;
+
+	unsigned int NUME = ElementGroup.GetNUME();
+
+	//	Loop over for all elements in group EleGrp
+	for (unsigned int Ele = 0; Ele < NUME; Ele++)
+    {
+        *this << setw(5) << Ele+1;
+		ElementGroup[Ele].Write(*this);
+    }
+
+	*this << endl;
+}
 //	Print load data
 void COutputter::OutputLoadInfo()
 {
@@ -297,6 +344,32 @@ void COutputter::OutputElementStress()
 				*this << endl;
 
 				break;
+
+			case ElementTypes::Beam: //Beam element
+				*this << "  ELEMENT             STRESS             TORSION             MOMENT_Y_1             MOMENT_Y_2             MOMENT_Z_1             MOMENT_Z_2             SHEAR_Y             SHEAR_Z" << endl //to be determined
+					<< "  NUMBER" << endl;
+
+				double* stressBeam = new double[8];
+
+				for (unsigned int Ele = 0; Ele < NUME; Ele++)
+				{
+					CElement& Element = EleGrp[Ele];
+					Element.ElementStress(stressBeam, Displacement);
+
+					CBeamMaterial& material = *dynamic_cast<CBeamMaterial*>(Element.GetElementMaterial());
+					
+					*this << setw(5) << Ele + 1 << setw(22) << stressBeam[0] << setw(18) << stressBeam[1] << setw(18) 
+						  << stressBeam[2] << setw(18) << stressBeam[3] << setw(18) << stressBeam[4] << setw(18)
+						  << stressBeam[5] << setw(18) << stressBeam[6] << setw(18) << stressBeam[7]
+						  << stressBeam << endl; // to be determined
+					
+				}
+
+				*this << endl;
+
+				break;
+
+
 
 			default: // Invalid element type
 				cerr << "*** Error *** Elment type " << ElementType
