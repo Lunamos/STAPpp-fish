@@ -42,7 +42,7 @@ bool CBeam::Read(ifstream& Input, CMaterial* MaterialSets, CNode* NodeList)
 	unsigned int N1, N2;	// Left node number and right node number
 
 	Input >> N1 >> N2 >> MSet;
-    ElementMaterial_ = dynamic_cast<CBarMaterial*>(MaterialSets) + MSet - 1;
+    ElementMaterial_ = dynamic_cast<CBeamMaterial*>(MaterialSets) + MSet - 1;
 	nodes_[0] = &NodeList[N1 - 1];
 	nodes_[1] = &NodeList[N2 - 1];
 
@@ -207,7 +207,7 @@ void CBeam::ElementStress(double* stress, double* Displacement)
 
 	// Calculate beam length
 	double DX[3];	//	dx = x2-x1, dy = y2-y1, dz = z2-z1
-	double L2 = 0;	//	Square of bar length (L^2)
+	double L2 = 0;	//	Square of beam length (L^2)
 
 	for (unsigned int i = 0; i < 3; i++)
 	{
