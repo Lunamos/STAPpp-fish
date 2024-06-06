@@ -43,3 +43,18 @@ void COutputter::OutputElementStress()
 }
 
 ```
+
+TODO::
+
+7. Is the orientation and the intertia principle axises should be determined in input file? 
+
+    It could use (0,0,-1) in local coordinate system as default z axis. But in this case, the stifness matrix is including Iyz? 
+
+8. How to calcuate the stress of the Beam? 
+
+    What is included? (Normal stress, 2 bending moment, 2 shearing force, Axial force, shear stress? )
+
+
+!!!!!! VERY IMPORTANT !!!!!!!
+Ip of beam is not Iy^2 + Iz^2, see strucural mechanices page 75
+Jp must be input
