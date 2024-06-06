@@ -189,17 +189,17 @@ void CBeam::ElementStress(double* stress, double* Displacement)
 		Funtion calculating the normal stress and bending moment of a beam element.
 	Variables:
 		* stress[0] = N_stress_1		Normal stress at the center of inertia of the section (for linear beam, its constant along x axis)
-		* stress[1] = Tx_1		Torsional moment at gauss point 1
+		* stress[1] = Tx		Torsional moment at gauss point 1
 		* stress[2] = My_1		Bending moment about the local y-axis at guass point 1
 		* stress[3] = My_2		Bending	moment about the local y-axis at guass point 2
 		* stress[4] = Mz_1		Bending moment about the local z-axis at gauss point 1
 		* stress[5] = Mz_2		Bending moment about the local z-axis at gauss point 2
-		* stress[6] = S_y_1		Shear force along the local y-axis (for linear beam, shear force distribution is cosntant along x axis)
-		* stress[7] = s_y_2		Shear force along the local z-axis
+		* stress[6] = S_y		Shear force along the local y-axis (for linear beam, shear force distribution is cosntant along x axis)
+		* stress[7] = S_z		Shear force along the local z-axis
 	*/
 	CBeamMaterial* material_ = dynamic_cast<CBeamMaterial*>(ElementMaterial_);	// Pointer to material of the element
 
-	if (sizeof(stress) / sizeof(stress[0]) < 10)
+	if (sizeof(stress) / sizeof(stress[0]) < 8)
 	{
 		cout << "Error: stress array for beam stress calculation size is not enough ( <10 )" << endl;
 		return;
