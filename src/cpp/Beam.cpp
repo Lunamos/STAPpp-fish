@@ -44,9 +44,6 @@ CBeam::~CBeam()
         }
         delete[] T_;
     }
-
-    delete[] nodes_;
-    delete[] LocationMatrix_;
 }
 
 //	Read element data from stream Input
