@@ -257,7 +257,7 @@ void CBeam::ElementStress(double* stress, double* Displacement)
 
 	if (sizeof(*stress) / sizeof(stress[0]) < 8)
 	{
-		cout << "Error: stress array for beam stress calculation size is not enough ( <10 )" << endl;
+		cout << "Error: stress array for beam stress calculation size is not enough ( <8 )" << endl;
 		return;
 	}
 

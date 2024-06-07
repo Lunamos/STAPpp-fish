@@ -44,7 +44,7 @@ void CBarMaterial::Write(COutputter& output)
 
 void CBeamMaterial::Write(COutputter& output)
 {
-	output << setw(16) << E << setw(16) << Area << setw(16) << Iz
+	output << setw(16) << E << setw(16) << Area << setw(16) << Iz << setw(16)
 		   << Iy << setw(16) << Jp << setw(16) << v << y_axis[0] << y_axis[1] << y_axis[2]
 		   << endl;
 }

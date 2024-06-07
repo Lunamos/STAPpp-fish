@@ -234,7 +234,7 @@ void COutputter::OutputBeamElements(unsigned int EleGrp)
 
 	*this << "  SET       YOUNG'S     CROSS-SECTIONAL     MOMENT OF INERTIA     MOMENT OF INERTIA      MOMENT OF INERTIA     POISSON" << endl
 		  << " NUMBER     MODULUS          AREA             ABOUT Z AXIS      	  ABOUT Y AXIS		   		 POLAR        	  RATIO" << endl
-		  << "               E              A					Iz					  Iy				 	   Jp		        v" << endl;
+		  << "               E              A					  Iz					   Iy				 	   Jp		        v" << endl;
 
 	*this << setiosflags(ios::scientific) << setprecision(5);
 
@@ -298,7 +298,7 @@ void COutputter::OutputNodalDisplacement()
 
 	*this << " D I S P L A C E M E N T S" << endl
 		  << endl;
-	*this << "  NODE           X-DISPLACEMENT    Y-DISPLACEMENT    Z-DISPLACEMENT" << endl;
+	*this << "  NODE           X-DISPLACEMENT    Y-DISPLACEMENT    Z-DISPLACEMENT    X-ANGLE    Y-ANGLE    Z-ANGLE" << endl;
 
 	for (unsigned int np = 0; np < FEMData->GetNUMNP(); np++)
 		NodeList[np].WriteNodalDisplacement(*this, Displacement);
