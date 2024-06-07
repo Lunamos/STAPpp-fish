@@ -362,10 +362,10 @@ void COutputter::OutputElementStress()
 
 					CBeamMaterial& material = *dynamic_cast<CBeamMaterial*>(Element.GetElementMaterial());
 					
-					*this << setw(5) << Ele + 1 << setw(22) << stressBeam[0] << setw(18) << stressBeam[1] << setw(18) 
-						  << stressBeam[2] << setw(18) << stressBeam[3] << setw(18) << stressBeam[4] << setw(18)
-						  << stressBeam[5] << setw(18) << stressBeam[6] << setw(18) << stressBeam[7]
-						  << stressBeam << endl; // to be determined
+					*this << setw(5) << Ele + 1 << setw(22) << stressBeam[0] << setw(22) << stressBeam[1] << setw(22) 
+						  << stressBeam[2] << setw(22) << stressBeam[3] << setw(22) << stressBeam[4] << setw(22)
+						  << stressBeam[5] << setw(22) << stressBeam[6] << setw(22) << stressBeam[7]
+						  << endl; // to be determined
 					
 				}
 			

@@ -104,6 +104,7 @@ void CBeam::ElementStiffness(double* Matrix)
 	double ke[12][12] = {0};
 
 	ke[0][0] = k;
+	ke[0][6] = -k;
 
 	ke[1][1] = 12 * material_->E * material_->Iz / (L * L * L);
 	ke[1][5] = 6 * material_->E * material_->Iz / (L * L);
