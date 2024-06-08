@@ -256,11 +256,7 @@ void CBeam::ElementStress(double* stress, double* Displacement)
 	*/
 	CBeamMaterial* material_ = dynamic_cast<CBeamMaterial*>(ElementMaterial_);	// Pointer to material of the element
 
-	if (sizeof(*stress) / sizeof(stress[0]) < 8)
-	{
-		cout << "Error: stress array for beam stress calculation size is not enough ( <8 )" << endl;
-		return;
-	}
+
 
 	// Calculate beam length
 	double DX[3];	//	dx = x2-x1, dy = y2-y1, dz = z2-z1
