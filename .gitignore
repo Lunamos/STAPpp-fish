@@ -1,7 +1,6 @@
 .vscode/
 .DS_Store
 src/build/
-data/
 docs/
 doxgen/
 *.pdf
