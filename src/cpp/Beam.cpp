@@ -270,9 +270,9 @@ void CBeam::ElementStress(double* stress, double* Displacement)
 	double L = sqrt(L2);	//	Beam length
 
 	// Calculate local x coordinate for gauss point 1 and 2
-	double x_gp[2] = {(-3 / sqrt(3) + 1) * L / 2, (3 / sqrt(3) + 1) * L / 2};
+	double x_gp[2] = {(-sqrt(3) / 3 + 1) * L / 2, (sqrt(3) / 3 + 1) * L / 2};
 
-	// Gather local displacements
+	// Gather displacements
 	double de[12] = {0};
 	for (unsigned int i = 0; i < 12; i ++)
 	{
@@ -297,14 +297,14 @@ void CBeam::ElementStress(double* stress, double* Displacement)
 	
 	stress[2] = ( material_->Iy * material_->E / L2 / L) * 
 					( (-12 * x_gp[0] + 6 * L) * de_local[2] + ( 6 * x_gp[0] * L - 4 * L2) * de_local[4] + 
-					  ( 12 * x_gp[0] - 6 * L) * de_local[8] + ( 6 * x_gp[0] * L - 2 * L2) * de_local[10] );
+					  ( 12 * x_gp[0] - 6 * L) * de_local[8] + ( 6 * x_gp[0] * L - 2 * L2) * de_local[10] );	// Bending moment about local y-axis at gauss point 1
 	stress[3] = ( material_->Iy * material_->E / L2 / L) * 
 					( (-12 * x_gp[1] + 6 * L) * de_local[2] + ( 6 * x_gp[1] * L - 4 * L2) * de_local[4] + 
 					  ( 12 * x_gp[1] - 6 * L) * de_local[8] + ( 6 * x_gp[1] * L - 2 * L2) * de_local[10] );
 
 	stress[4] = (-material_->Iz * material_->E / L2 / L) * 
 					( (-12 * x_gp[0] + 6 * L) * de_local[1] + (-6 * x_gp[0] * L + 4 * L2) * de_local[5] + 
-					  ( 12 * x_gp[0] - 6 * L) * de_local[7] + (-6 * x_gp[0] * L + 2 * L2) * de_local[11] );
+					  ( 12 * x_gp[0] - 6 * L) * de_local[7] + (-6 * x_gp[0] * L + 2 * L2) * de_local[11] );	// Bending moment about local z-axis at gauss point 1
 	stress[5] = (-material_->Iz * material_->E / L2 / L) * 
 					( (-12 * x_gp[1] + 6 * L) * de_local[1] + (-6 * x_gp[1] * L + 4 * L2) * de_local[5] + 
 					  ( 12 * x_gp[1] - 6 * L) * de_local[7] + (-6 * x_gp[1] * L + 2 * L2) * de_local[11] );
