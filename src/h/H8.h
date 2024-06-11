@@ -8,42 +8,35 @@
 /*     http://www.comdyn.cn/                                                 */
 /*****************************************************************************/
 
-#include "Material.h"
+#pragma once
 
-#include <iostream>
-#include <fstream>
-#include <iomanip>
+#include "Element.h"
 
 using namespace std;
 
-//	Read material data from stream Input
-bool CBarMaterial::Read(ifstream &Input)
+//! 8H cube element class with reduced integration
+class CH8 : public CElement
 {
-	Input >> nset; // Number of property set
+public:
+	//!	Constructor
+	CH8();
 
-	Input >> E >> Area; // Young's modulus and section area
+	//!	Desconstructor
+	~CH8();
 
-	return true;
-}
+	//!	Read element data from stream Input
+	virtual bool Read(ifstream &Input, CMaterial *MaterialSets, CNode *NodeList);
 
-//	Write material data to Stream
-void CBarMaterial::Write(COutputter &output)
-{
-	output << setw(16) << E << setw(16) << Area << endl;
-}
+	//!	Write element data to stream
+	virtual void Write(COutputter &output);
 
-//	Read material data from stream Input
-bool CH8Material::Read(ifstream &Input)
-{
-	Input >> nset; // Number of property set
+	void Write(COutputter &output, unsigned int no);
 
-	Input >> E >> Nu; // Young's modulus and section area
+	unsigned int SizeOfStiffnessMatrix();
 
-	return true;
-}
+	//!	Calculate element stiffness matrix
+	virtual void ElementStiffness(double *Matrix);
 
-//	Write material data to Stream
-void CH8Material::Write(COutputter &output)
-{
-	output << setw(16) << E << setw(16) << Nu << endl;
-}
+	//!	Calculate element stress
+	virtual void ElementStress(double *stress, double *Displacement);
+};
