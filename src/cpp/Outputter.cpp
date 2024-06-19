@@ -161,6 +161,9 @@ void COutputter::OutputElementInfo()
 			case ElementTypes::Bar: // Bar element
 				OutputBarElements(EleGrp);
 				break;
+			case ElementTypes::Q4: // Q4 element
+				OutputQ4Elements(EleGrp);
+				break;
 		    default:
 		        *this << ElementType << " has not been implemented yet." << endl;
 		        break;
@@ -185,6 +188,52 @@ void COutputter::OutputBarElements(unsigned int EleGrp)
 	*this << "  SET       YOUNG'S     CROSS-SECTIONAL" << endl
 		  << " NUMBER     MODULUS          AREA" << endl
 		  << "               E              A" << endl;
+
+	*this << setiosflags(ios::scientific) << setprecision(5);
+
+	//	Loop over for all property sets
+	for (unsigned int mset = 0; mset < NUMMAT; mset++)
+    {
+        *this << setw(5) << mset+1;
+		ElementGroup.GetMaterial(mset).Write(*this);
+    }
+
+	*this << endl << endl
+		  << " E L E M E N T   I N F O R M A T I O N" << endl;
+    
+	*this << " ELEMENT     NODE     NODE       MATERIAL" << endl
+		  << " NUMBER-N      I        J       SET NUMBER" << endl;
+
+	unsigned int NUME = ElementGroup.GetNUME();
+
+	//	Loop over for all elements in group EleGrp
+	for (unsigned int Ele = 0; Ele < NUME; Ele++)
+    {
+        *this << setw(5) << Ele+1;
+		ElementGroup[Ele].Write(*this);
+    }
+
+	*this << endl;
+}
+
+//	Output Q4 element data
+void COutputter::OutputQ4Elements(unsigned int EleGrp)
+{
+	CDomain* FEMData = CDomain::GetInstance();
+
+	CElementGroup& ElementGroup = FEMData->GetEleGrpList()[EleGrp];
+	unsigned int NUMMAT = ElementGroup.GetNUMMAT();
+
+	*this << " M A T E R I A L   D E F I N I T I O N" << endl
+		  << endl;
+	*this << " NUMBER OF DIFFERENT SETS OF MATERIAL" << endl;
+	*this << " AND CROSS-SECTIONAL  CONSTANTS  . . . .( NPAR(3) ) . . =" << setw(5) << NUMMAT
+		  << endl
+		  << endl;
+
+	*this << "  SET       YOUNG'S     POISSON" << endl
+		  << " NUMBER     MODULUS      RATIO" << endl
+		  << "               E           NU" << endl;
 
 	*this << setiosflags(ios::scientific) << setprecision(5);
 
@@ -275,14 +324,15 @@ void COutputter::OutputElementStress()
 		CElementGroup& EleGrp = FEMData->GetEleGrpList()[EleGrpIndex];
 		unsigned int NUME = EleGrp.GetNUME();
 		ElementTypes ElementType = EleGrp.GetElementType();
-
+		double stress2[3] = {0};
+		double stress;
 		switch (ElementType)
 		{
 			case ElementTypes::Bar: // Bar element
 				*this << "  ELEMENT             FORCE            STRESS" << endl
 					<< "  NUMBER" << endl;
 
-				double stress;
+				// double stress;
 
 				for (unsigned int Ele = 0; Ele < NUME; Ele++)
 				{
@@ -292,6 +342,44 @@ void COutputter::OutputElementStress()
 					CBarMaterial& material = *dynamic_cast<CBarMaterial*>(Element.GetElementMaterial());
 					*this << setw(5) << Ele + 1 << setw(22) << stress * material.Area << setw(18)
 						<< stress << endl;
+				}
+
+				*this << endl;
+
+				break;
+
+			// case ElementTypes::Q4: // Q4 element
+            //     *this << "  ELEMENT             STRESS" << endl
+            //         << "  NUMBER          σx          σy         τxy" << endl;
+
+            //     double* stress[3]; // Assuming stress has three components: σx, σy, τxy
+
+            //     for (unsigned int Ele = 0; Ele < NUME; Ele++)
+            //     {
+            //         CElement& Element = EleGrp[Ele];
+            //         Element.ElementStress(stress, Displacement);
+
+            //         *this << setw(5) << Ele + 1 << setw(14) << stress[0] << setw(14)
+            //             << stress[1] << setw(14) << stress[2] << endl;
+            //     }
+			case ElementTypes::Q4: // Q4 element
+				*this << "  ELEMENT             STRESS" << endl
+					<< "  NUMBER" << endl;
+
+				// double stress;
+				
+				for (unsigned int Ele = 0; Ele < NUME; Ele++)
+				{
+					CElement& Element = EleGrp[Ele];
+					Element.ElementStress(stress2, Displacement);
+
+					CQ4Material& material = *dynamic_cast<CQ4Material*>(Element.GetElementMaterial());
+					*this << setw(5) << Ele + 1;
+					for (int i = 0; i < 3; ++i) {
+						*this << setw(15) << stress2[i];
+					}
+					*this << endl;
+					// *this << setw(5) << Ele + 1 << setw(22)	<< stress << endl;
 				}
 
 				*this << endl;

@@ -10,6 +10,7 @@
 
 #include "Domain.h"
 #include "Bar.h"
+#include "Q4.h"
 #include "Outputter.h"
 #include "Clock.h"
 

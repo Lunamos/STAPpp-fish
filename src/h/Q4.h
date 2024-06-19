@@ -8,42 +8,32 @@
 /*     http://www.comdyn.cn/                                                 */
 /*****************************************************************************/
 
-#include "Material.h"
+#pragma once
 
-#include <iostream>
-#include <fstream>
-#include <iomanip>
+#include "Element.h"
 
 using namespace std;
 
-//	Read material data from stream Input
-bool CBarMaterial::Read(ifstream& Input)
+//! Q4 element class
+class CQ4 : public CElement
 {
-	Input >> nset;	// Number of property set
+public:
 
-	Input >> E >> Area;	// Young's modulus and section area
+//!	Constructor
+	CQ4();
 
-	return true;
-}
+//!	Desconstructor
+	~CQ4();
 
-//	Write material data to Stream
-void CBarMaterial::Write(COutputter& output)
-{
-	output << setw(16) << E << setw(16) << Area << endl;
-}
+//!	Read element data from stream Input
+	virtual bool Read(ifstream& Input, CMaterial* MaterialSets, CNode* NodeList);
 
-//	Read material data from stream Input
-bool CQ4Material::Read(ifstream& Input)
-{
-	Input >> nset;	// Number of property set
+//!	Write element data to stream
+	virtual void Write(COutputter& output);
 
-	Input >> E >> nu;	// Young's modulus and Poisson ratio
+//!	Calculate element stiffness matrix
+	virtual void ElementStiffness(double* Matrix);
 
-	return true;
-}
-
-//	Write material data to Stream
-void CQ4Material::Write(COutputter& output)
-{
-	output << setw(16) << E << setw(16) << nu << endl;
-}
+//!	Calculate element stress
+	virtual void ElementStress(double* stress, double* Displacement);
+};
