@@ -149,6 +149,7 @@ void COutputter::OutputElementInfo()
 			  << ElementType << endl;
 		*this << "     EQ.1, TRUSS ELEMENTS" << endl
 			  << "     EQ.2, ELEMENTS CURRENTLY" << endl
+			  << "     EQ.7, SHELL ELEMENTS" << endl
 			  << "     EQ.3, NOT AVAILABLE" << endl
 			  << endl;
 
@@ -160,6 +161,9 @@ void COutputter::OutputElementInfo()
 		{
 			case ElementTypes::Bar: // Bar element
 				OutputBarElements(EleGrp);
+				break;
+			case ElementTypes::Shell: // Shell element
+				OutputShellElements(EleGrp);
 				break;
 		    default:
 		        *this << ElementType << " has not been implemented yet." << endl;
@@ -213,6 +217,52 @@ void COutputter::OutputBarElements(unsigned int EleGrp)
 	*this << endl;
 }
 
+//	Output shell element data
+void COutputter::OutputShellElements(unsigned int EleGrp)
+{
+	CDomain* FEMData = CDomain::GetInstance();
+
+	CElementGroup& ElementGroup = FEMData->GetEleGrpList()[EleGrp];
+	unsigned int NUMMAT = ElementGroup.GetNUMMAT();
+
+	*this << " M A T E R I A L   D E F I N I T I O N" << endl
+		  << endl;
+	*this << " NUMBER OF DIFFERENT SETS OF MATERIAL" << endl
+		  << " AND CROSS-SECTIONAL  CONSTANTS  . . . .( NPAR(3) ) . . =" << setw(5) << NUMMAT
+		  << endl
+		  << endl;
+
+	*this << "  SET       YOUNG'S     POISSON'S     THICKNESS" << endl
+		  << " NUMBER     MODULUS       RATIO          " << endl
+		  << "               E            NU            T" << endl;
+
+	*this << setiosflags(ios::scientific) << setprecision(5);
+
+	//	Loop over for all property sets
+	for (unsigned int mset = 0; mset < NUMMAT; mset++)
+	{
+		*this << setw(5) << mset+1;
+		ElementGroup.GetMaterial(mset).Write(*this);
+	}
+
+	*this << endl << endl
+		  << " E L E M E N T   I N F O R M A T I O N" << endl;
+
+	*this << " ELEMENT     NODE     NODE     NODE     NODE       MATERIAL" << endl
+		  << " NUMBER-N      I        J        K        L       SET NUMBER" << endl;
+
+	unsigned int NUME = ElementGroup.GetNUME();
+
+	//	Loop over for all elements in group EleGrp
+	for (unsigned int Ele = 0; Ele < NUME; Ele++)
+	{
+		*this << setw(5) << Ele+1;
+		ElementGroup[Ele].Write(*this);
+	}
+
+	*this << endl;
+}
+
 //	Print load data
 void COutputter::OutputLoadInfo()
 {
@@ -249,7 +299,7 @@ void COutputter::OutputNodalDisplacement()
 
 	*this << " D I S P L A C E M E N T S" << endl
 		  << endl;
-	*this << "  NODE           X-DISPLACEMENT    Y-DISPLACEMENT    Z-DISPLACEMENT" << endl;
+	*this << "  NODE           X-DISPLACEMENT    Y-DISPLACEMENT    Z-DISPLACEMENT    X-ANGLE    Y-ANGLE    Z-ANGLE" << endl;
 
 	for (unsigned int np = 0; np < FEMData->GetNUMNP(); np++)
 		NodeList[np].WriteNodalDisplacement(*this, Displacement);
@@ -279,6 +329,7 @@ void COutputter::OutputElementStress()
 		switch (ElementType)
 		{
 			case ElementTypes::Bar: // Bar element
+			{
 				*this << "  ELEMENT             FORCE            STRESS" << endl
 					<< "  NUMBER" << endl;
 
@@ -297,6 +348,29 @@ void COutputter::OutputElementStress()
 				*this << endl;
 
 				break;
+			}
+			case ElementTypes::Shell: // Shell element
+			{
+				*this << "  ELEMENT             STRESS_X			STRESS_Y			STRESS_Z			MOMENT_X			MOMENT_Y			SHEAR_Z" << endl
+					<< "  NUMBER" << endl;
+
+				double* stress = new double[6];
+
+				for (unsigned int Ele = 0; Ele < NUME; Ele++)
+				{
+					CElement& Element = EleGrp[Ele];
+					Element.ElementStress(stress, Displacement);
+
+					*this << setw(5) << Ele + 1 << setw(18) << stress[0] << setw(18) << stress[1] << setw(18)
+						<< stress[2] << setw(18) << stress[3] << setw(18) << stress[4] << setw(18) << stress[5] << endl;
+				}
+
+				delete[] stress;
+
+				*this << endl;
+
+				break;
+			}
 
 			default: // Invalid element type
 				cerr << "*** Error *** Elment type " << ElementType

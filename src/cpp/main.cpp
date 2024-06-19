@@ -10,6 +10,7 @@
 
 #include "Domain.h"
 #include "Bar.h"
+#include "Shell.h"
 #include "Outputter.h"
 #include "Clock.h"
 
@@ -41,6 +42,7 @@ int main(int argc, char *argv[])
     string InFile = filename + ".dat";
 	string OutFile = filename + ".out";
 
+    // Create data input object
 	CDomain* FEMData = CDomain::GetInstance();
 
     Clock timer;
@@ -63,10 +65,14 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    
+
 //  Allocate global vectors and matrices, such as the Force, ColumnHeights,
 //  DiagonalAddress and StiffnessMatrix, and calculate the column heights
 //  and address of diagonal elements
 	FEMData->AllocateMatrices();
+
+    cout << "Allocated Matrics" << endl;
     
 //  Assemble the banded gloabl stiffness matrix
 	FEMData->AssembleStiffnessMatrix();

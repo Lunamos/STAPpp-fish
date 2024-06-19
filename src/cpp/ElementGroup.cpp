@@ -66,6 +66,10 @@ void CElementGroup::CalculateMemberSize()
             ElementSize_ = sizeof(CBar);
             MaterialSize_ = sizeof(CBarMaterial);
             break;
+        case ElementTypes::Shell:   // added by Wang Qiyao on 2024.6.3
+            ElementSize_ = sizeof(CShell);
+            MaterialSize_ = sizeof(CShellMaterial);
+            break;
         default:
             std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::CalculateMemberSize." << std::endl;
             exit(5);
@@ -81,6 +85,9 @@ void CElementGroup::AllocateElements(std::size_t size)
         case ElementTypes::Bar:
             ElementList_ = new CBar[size];
             break;
+        case ElementTypes::Shell:   // added by Wang Qiyao on 2024.6.3
+            ElementList_ = new CShell[size];
+            break;
         default:
             std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::AllocateElement." << std::endl;
             exit(5);
@@ -94,6 +101,9 @@ void CElementGroup::AllocateMaterials(std::size_t size)
     {
         case ElementTypes::Bar:
             MaterialList_ = new CBarMaterial[size];
+            break;
+        case ElementTypes::Shell:   // added by Wang Qiyao on 2024.6.3
+            MaterialList_ = new CShellMaterial[size];
             break;
         default:
             std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::AllocateMaterial." << std::endl;

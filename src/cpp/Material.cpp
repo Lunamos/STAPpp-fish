@@ -26,8 +26,22 @@ bool CBarMaterial::Read(ifstream& Input)
 	return true;
 }
 
+bool CShellMaterial::Read(ifstream& Input)
+{
+	Input >> nset;	// Number of property set
+
+	Input >> E >> nu >> thickness;	// Young's modulus, Poisson ratio and thickness
+
+	return true;
+}
+
 //	Write material data to Stream
 void CBarMaterial::Write(COutputter& output)
 {
 	output << setw(16) << E << setw(16) << Area << endl;
+}
+
+void CShellMaterial::Write(COutputter& output)
+{
+	output << setw(16) << E << setw(16) << nu << setw(16) << thickness << endl;
 }

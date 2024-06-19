@@ -26,22 +26,22 @@ CDomain* CDomain::_instance = nullptr;
 CDomain::CDomain()
 {
 	Title[0] = '0';
-	MODEX = 0;
+	MODEX = 0;					// 0 for test, 1 for solve
 
-	NUMNP = 0;
-	NodeList = nullptr;
+	NUMNP = 0;  				// Number of nodes
+	NodeList = nullptr; 		// List of nodes: node number, bcode * 3 (eq number) , xyz * 3
 	
-	NUMEG = 0;
-	EleGrpList = nullptr;
+	NUMEG = 0;					// Number of element groups
+	EleGrpList = nullptr;		// List of element groups: element type, number of elements, material number, nodes * 8
 	
-	NLCASE = 0;
-	NLOAD = nullptr;
-	LoadCases = nullptr;
+	NLCASE = 0;					// Number of load cases
+	NLOAD = nullptr;			// 
+	LoadCases = nullptr;		// List of load cases: node, dof, load
 	
-	NEQ = 0;
+	NEQ = 0;					// Number of equations
 
-	Force = nullptr;
-	StiffnessMatrix = nullptr;
+	Force = nullptr;			// Force vector
+	StiffnessMatrix = nullptr;	// Global stiffness matrix
 }
 
 //	Desconstructor
@@ -78,6 +78,7 @@ bool CDomain::ReadData(string FileName, string OutFile)
 		exit(3);
 	}
 
+//	Create output pointer
 	COutputter* Output = COutputter::GetInstance(OutFile);
 
 //	Read the heading line
@@ -243,7 +244,7 @@ void CDomain::CalculateColumnHeights()
 //    and calculate the column heights and address of diagonal elements
 void CDomain::AllocateMatrices()
 {
-    //    Allocate for global force/displacement vector
+	//    Allocate for global force/displacement vector
     Force = new double[NEQ];
     
     //  Create the banded stiffness matrix

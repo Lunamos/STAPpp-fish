@@ -21,7 +21,7 @@ public:
 
 //!	Maximum number of degrees of freedom per node
 /*!	For 3D bar and solid elements, NDF = 3. For 3D beam or shell elements, NDF = 5 or 6 */
-	const static unsigned int NDF = 3;
+	const static unsigned int NDF = 6;
 
 //!	Node numer
 	unsigned int NodeNumber;

@@ -52,3 +52,21 @@ public:
 //!	Write material data to Stream
 	virtual void Write(COutputter& output);
 };
+
+//!	Material class for Shell element (Wang Qiyao 2024.6.3)
+class CShellMaterial : public CMaterial
+{
+public:
+
+	double nu;			//!< Poisson's ratio
+
+	double thickness;	//!< Thickness of a shell element
+
+public:
+
+//!	Read material data from stream Input
+	virtual bool Read(ifstream& Input);
+
+//!	Write material data to Stream
+	virtual void Write(COutputter& output);
+};
