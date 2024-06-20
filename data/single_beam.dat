@@ -1,0 +1,9 @@
+An test data file for a 3d beam with moment on right node
+2   1   1   1
+1   1   1   1   1   1   1   0   0   0
+2   1   0   1   1   1   0   10   0   0   
+1   1
+2   6   10
+5   1   1
+1   1000   1   0.08333   0.08333   0   0.3 0  1   0
+1   1   2   1

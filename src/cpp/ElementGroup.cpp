@@ -77,6 +77,11 @@ void CElementGroup::CalculateMemberSize()
             ElementSize_ = sizeof(CH8);
             MaterialSize_ = sizeof(CH8Material);
             break;
+        case ElementTypes::Beam:
+            ElementSize_ = sizeof(CBeam);
+            MaterialSize_ = sizeof(CBeamMaterial);
+            break;
+
         default:
             std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::CalculateMemberSize." << std::endl;
             exit(5);
@@ -101,6 +106,9 @@ void CElementGroup::AllocateElements(std::size_t size)
         case ElementTypes::H8:
             ElementList_ = new CH8[size];
             break;
+        case ElementTypes::Beam:
+            ElementList_ = new CBeam[size];
+            break;
         default:
             std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::AllocateElement." << std::endl;
             exit(5);
@@ -124,6 +132,8 @@ void CElementGroup::AllocateMaterials(std::size_t size)
         case ElementTypes::H8:
             MaterialList_ = new CH8Material[size];
             break;
+        case ElementTypes::Beam:
+            MaterialList_ = new CBeamMaterial[size];
         default:
             std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::AllocateMaterial." << std::endl;
             exit(5);

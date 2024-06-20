@@ -1,5 +1,9 @@
 # Ignore .vscode and build directories inside src
+.DS_Store
 src/.vscode/
 src/build/
+docs/
+doxgen/
 .vscode/
 build/
+*.pdf

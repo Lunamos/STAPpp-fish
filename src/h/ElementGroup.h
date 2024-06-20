@@ -14,6 +14,7 @@
 
 #include "Element.h"
 #include "Bar.h"
+#include "Beam.h"
 #include "H8.h"
 #include "Q4.h"
 #include "T3.h"

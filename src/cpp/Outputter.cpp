@@ -150,6 +150,7 @@ void COutputter::OutputElementInfo()
 			  << ElementType << endl;
 		*this << "     EQ.1, TRUSS ELEMENTS" << endl
 			  << "     EQ.2, ELEMENTS CURRENTLY" << endl
+			  << "     EQ.5, BEAM ELEMENTS" << endl
 			  << "     EQ.3, NOT AVAILABLE" << endl
 			  << endl;
 
@@ -171,7 +172,10 @@ void COutputter::OutputElementInfo()
 			case ElementTypes::H8: // H8 cube element
 				OutputH8Elements(EleGrp);
 				break;
-		   default:
+      case ElementTypes::Beam: // Beam element
+				OutputBeamElements(EleGrp);
+				break;
+		  default:
 		        *this << ElementType << " has not been implemented yet." << endl;
 		        break;
 		}
@@ -316,6 +320,7 @@ void COutputter::OutputQ4Elements(unsigned int EleGrp)
 	*this << endl;
 }
 
+//	Output T3 element data
 void COutputter::OutputT3Elements(unsigned int EleGrp){
 	CDomain* FEMData = CDomain::GetInstance();
 
@@ -360,6 +365,53 @@ void COutputter::OutputT3Elements(unsigned int EleGrp){
 	*this << endl;
 }
 
+//	Output beam element data
+void COutputter::OutputBeamElements(unsigned int EleGrp)
+{
+	CDomain* FEMData = CDomain::GetInstance();
+
+	CElementGroup& ElementGroup = FEMData->GetEleGrpList()[EleGrp];
+	unsigned int NUMMAT = ElementGroup.GetNUMMAT();
+
+	*this << " M A T E R I A L   D E F I N I T I O N" << endl
+		  << endl;
+	*this << " NUMBER OF DIFFERENT SETS OF MATERIAL" << endl;
+	*this << " AND CROSS-SECTIONAL  CONSTANTS  . . . .( NPAR(3) ) . . =" << setw(5) << NUMMAT
+		  << endl
+		  << endl;
+
+	*this << "  SET       YOUNG'S     CROSS-SECTIONAL     MOMENT OF INERTIA     MOMENT OF INERTIA      MOMENT OF INERTIA     POISSON" << endl
+		  << " NUMBER     MODULUS          AREA             ABOUT Z AXIS      	  ABOUT Y AXIS		   		 POLAR        	  RATIO" << endl
+		  << "               E              A					  Iz					   Iy				 	   Jp		        v" << endl;
+
+	*this << setiosflags(ios::scientific) << setprecision(5);
+
+	//	Loop over for all property sets
+	for (unsigned int mset = 0; mset < NUMMAT; mset++)
+    {
+        *this << setw(5) << mset+1;
+		ElementGroup.GetMaterial(mset).Write(*this);
+    }
+
+	*this << endl << endl
+		  << " E L E M E N T   I N F O R M A T I O N" << endl;
+
+	*this << " ELEMENT     NODE     NODE       MATERIAL" << endl
+		  << " NUMBER-N      I        J       SET NUMBER" << endl;
+
+	unsigned int NUME = ElementGroup.GetNUME();
+
+	//	Loop over for all elements in group EleGrp
+	for (unsigned int Ele = 0; Ele < NUME; Ele++)
+    {
+        *this << setw(5) << Ele+1;
+		ElementGroup[Ele].Write(*this);
+    }
+
+	*this << endl;
+}
+
+  
 //	Print load data
 void COutputter::OutputLoadInfo()
 {
@@ -396,7 +448,7 @@ void COutputter::OutputNodalDisplacement()
 
 	*this << " D I S P L A C E M E N T S" << endl
 		  << endl;
-	*this << "  NODE           X-DISPLACEMENT    Y-DISPLACEMENT    Z-DISPLACEMENT" << endl;
+	*this << "  NODE           X-DISPLACEMENT    Y-DISPLACEMENT    Z-DISPLACEMENT    X-ANGLE    Y-ANGLE    Z-ANGLE" << endl;
 
 	for (unsigned int np = 0; np < FEMData->GetNUMNP(); np++)
 		NodeList[np].WriteNodalDisplacement(*this, Displacement);
@@ -426,7 +478,7 @@ void COutputter::OutputElementStress()
 		switch (ElementType)
 		{
 			case ElementTypes::Bar: // Bar element
-			{
+			{	
 				*this << "  ELEMENT             FORCE            STRESS" << endl
 					<< "  NUMBER" << endl;
 				double stress;
@@ -445,6 +497,34 @@ void COutputter::OutputElementStress()
 
 				break;
 			}
+
+			case ElementTypes::Beam: //Beam element
+			{
+				*this << "  ELEMENT             STRESS             TORSION             MOMENT_Y_1             MOMENT_Y_2             MOMENT_Z_1             MOMENT_Z_2             SHEAR_Y             SHEAR_Z" << endl //to be determined
+					<< "  NUMBER" << endl;
+
+				double* stressBeam = new double[8];
+                				for (unsigned int Ele = 0; Ele < NUME; Ele++)
+				{
+					CElement& Element = EleGrp[Ele];
+					Element.ElementStress(stressBeam, Displacement);
+
+					CBeamMaterial& material = *dynamic_cast<CBeamMaterial*>(Element.GetElementMaterial());
+					
+					*this << setw(5) << Ele + 1 << setw(22) << stressBeam[0] << setw(22) << stressBeam[1] << setw(22) 
+						  << stressBeam[2] << setw(22) << stressBeam[3] << setw(22) << stressBeam[4] << setw(22)
+						  << stressBeam[5] << setw(22) << stressBeam[6] << setw(22) << stressBeam[7]
+						  << endl; // to be determined
+					
+				}
+			
+				delete[] stressBeam;
+
+				*this << endl;
+
+				break;
+            }
+
 
 			case ElementTypes::H8: // H8 cube element
 			{
@@ -512,7 +592,7 @@ void COutputter::OutputElementStress()
 				*this << endl;
 				break;
 			}
-
+                
 			default: // Invalid element type
 				cerr << "*** Error *** Elment type " << ElementType
 					<< " has not been implemented.\n\n";
