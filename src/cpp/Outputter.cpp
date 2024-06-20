@@ -17,11 +17,11 @@
 using namespace std;
 
 //	Output current time and date
-void COutputter::PrintTime(const struct tm* ptm, COutputter &output)
+void COutputter::PrintTime(const struct tm *ptm, COutputter &output)
 {
-	const char* weekday[] = {"Sunday", "Monday", "Tuesday", "Wednesday",
+	const char *weekday[] = {"Sunday", "Monday", "Tuesday", "Wednesday",
 							 "Thursday", "Friday", "Saturday"};
-	const char* month[] = {"January", "February", "March", "April", "May", "June",
+	const char *month[] = {"January", "February", "March", "April", "May", "June",
 						   "July", "August", "September", "October", "November", "December"};
 
 	output << "        (";
@@ -31,7 +31,7 @@ void COutputter::PrintTime(const struct tm* ptm, COutputter &output)
 		   << endl;
 }
 
-COutputter* COutputter::_instance = nullptr;
+COutputter *COutputter::_instance = nullptr;
 
 //	Constructor
 COutputter::COutputter(string FileName)
@@ -46,23 +46,23 @@ COutputter::COutputter(string FileName)
 }
 
 //	Return the single instance of the class
-COutputter* COutputter::GetInstance(string FileName)
+COutputter *COutputter::GetInstance(string FileName)
 {
 	if (!_instance)
 		_instance = new COutputter(FileName);
-    
+
 	return _instance;
 }
 
 //	Print program logo
 void COutputter::OutputHeading()
 {
-	CDomain* FEMData = CDomain::GetInstance();
+	CDomain *FEMData = CDomain::GetInstance();
 
 	*this << "TITLE : " << FEMData->GetTitle() << endl;
 
 	time_t rawtime;
-	struct tm* timeinfo;
+	struct tm *timeinfo;
 
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
@@ -73,9 +73,9 @@ void COutputter::OutputHeading()
 //	Print nodal data
 void COutputter::OutputNodeInfo()
 {
-	CDomain* FEMData = CDomain::GetInstance();
+	CDomain *FEMData = CDomain::GetInstance();
 
-	CNode* NodeList = FEMData->GetNodeList();
+	CNode *NodeList = FEMData->GetNodeList();
 
 	*this << "C O N T R O L   I N F O R M A T I O N" << endl
 		  << endl;
@@ -95,7 +95,8 @@ void COutputter::OutputNodeInfo()
 		  << "         EQ.1, EXECUTION" << endl
 		  << endl;
 
-	*this << " N O D A L   P O I N T   D A T A" << endl << endl;
+	*this << " N O D A L   P O I N T   D A T A" << endl
+		  << endl;
 	*this << "    NODE       BOUNDARY                         NODAL POINT" << endl
 		  << "   NUMBER  CONDITION  CODES                     COORDINATES" << endl;
 
@@ -108,10 +109,10 @@ void COutputter::OutputNodeInfo()
 //	Output equation numbers
 void COutputter::OutputEquationNumber()
 {
-	CDomain* FEMData = CDomain::GetInstance();
+	CDomain *FEMData = CDomain::GetInstance();
 	unsigned int NUMNP = FEMData->GetNUMNP();
 
-	CNode* NodeList = FEMData->GetNodeList();
+	CNode *NodeList = FEMData->GetNodeList();
 
 	*this << " EQUATION NUMBERS" << endl
 		  << endl;
@@ -129,7 +130,7 @@ void COutputter::OutputElementInfo()
 {
 	//	Print element group control line
 
-	CDomain* FEMData = CDomain::GetInstance();
+	CDomain *FEMData = CDomain::GetInstance();
 
 	unsigned int NUMEG = FEMData->GetNUMEG();
 
@@ -162,10 +163,19 @@ void COutputter::OutputElementInfo()
 			case ElementTypes::Bar: // Bar element
 				OutputBarElements(EleGrp);
 				break;
-			case ElementTypes::Beam: // Beam element
+			case ElementTypes::T3: // Q4 element
+				OutputT3Elements(EleGrp);
+				break;
+			case ElementTypes::Q4: // Q4 element
+				OutputQ4Elements(EleGrp);
+				break;
+			case ElementTypes::H8: // H8 cube element
+				OutputH8Elements(EleGrp);
+				break;
+      case ElementTypes::Beam: // Beam element
 				OutputBeamElements(EleGrp);
 				break;
-		    default:
+		  default:
 		        *this << ElementType << " has not been implemented yet." << endl;
 		        break;
 		}
@@ -174,9 +184,9 @@ void COutputter::OutputElementInfo()
 //	Output bar element data
 void COutputter::OutputBarElements(unsigned int EleGrp)
 {
-	CDomain* FEMData = CDomain::GetInstance();
+	CDomain *FEMData = CDomain::GetInstance();
 
-	CElementGroup& ElementGroup = FEMData->GetEleGrpList()[EleGrp];
+	CElementGroup &ElementGroup = FEMData->GetEleGrpList()[EleGrp];
 	unsigned int NUMMAT = ElementGroup.GetNUMMAT();
 
 	*this << " M A T E R I A L   D E F I N I T I O N" << endl
@@ -194,6 +204,99 @@ void COutputter::OutputBarElements(unsigned int EleGrp)
 
 	//	Loop over for all property sets
 	for (unsigned int mset = 0; mset < NUMMAT; mset++)
+	{
+		*this << setw(5) << mset + 1;
+		ElementGroup.GetMaterial(mset).Write(*this);
+	}
+
+	*this << endl
+		  << endl
+		  << " E L E M E N T   I N F O R M A T I O N" << endl;
+
+	*this << " ELEMENT     NODE     NODE       MATERIAL" << endl
+		  << " NUMBER-N      I        J       SET NUMBER" << endl;
+
+	unsigned int NUME = ElementGroup.GetNUME();
+
+	//	Loop over for all elements in group EleGrp
+	for (unsigned int Ele = 0; Ele < NUME; Ele++)
+	{
+		*this << setw(5) << Ele + 1;
+		ElementGroup[Ele].Write(*this);
+	}
+
+	*this << endl;
+}
+
+void COutputter::OutputH8Elements(unsigned int EleGrp)
+{
+	CDomain *FEMData = CDomain::GetInstance();
+
+	CElementGroup &ElementGroup = FEMData->GetEleGrpList()[EleGrp];
+	unsigned int NUMMAT = ElementGroup.GetNUMMAT();
+
+	*this << " M A T E R I A L   D E F I N I T I O N" << endl
+		  << endl;
+	*this << " NUMBER OF DIFFERENT SETS OF MATERIAL" << endl;
+	*this << " AND CROSS-SECTIONAL  CONSTANTS  . . . .( NPAR(3) ) . . =" << setw(5) << NUMMAT
+		  << endl
+		  << endl;
+
+	*this << "  SET       YOUNG'S       POISSON'S" << endl
+		  << " NUMBER     MODULUS         RATIO" << endl
+		  << "               E              NU" << endl;
+
+	*this << setiosflags(ios::scientific) << setprecision(5);
+
+	//	Loop over for all property sets
+	for (unsigned int mset = 0; mset < NUMMAT; mset++)
+	{
+		*this << setw(5) << mset + 1;
+		ElementGroup.GetMaterial(mset).Write(*this);
+	}
+
+	*this << endl
+		  << endl
+		  << " E L E M E N T   I N F O R M A T I O N" << endl;
+
+	*this << "  ELEMENT     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE       MATERIAL" << endl
+		  << " NUMBER-N      1        2        3        4        5        6        7        8       SET NUMBER" << endl;
+
+	unsigned int NUME = ElementGroup.GetNUME();
+
+	//	Loop over for all elements in group EleGrp
+	for (unsigned int Ele = 0; Ele < NUME; Ele++)
+	{
+		*this << setw(6) << Ele + 1;
+		ElementGroup[Ele].Write(*this);
+	}
+
+	*this << endl;
+}
+
+//	Output Q4 element data
+void COutputter::OutputQ4Elements(unsigned int EleGrp)
+{
+	CDomain* FEMData = CDomain::GetInstance();
+
+	CElementGroup& ElementGroup = FEMData->GetEleGrpList()[EleGrp];
+	unsigned int NUMMAT = ElementGroup.GetNUMMAT();
+
+	*this << " M A T E R I A L   D E F I N I T I O N" << endl
+		  << endl;
+	*this << " NUMBER OF DIFFERENT SETS OF MATERIAL" << endl;
+	*this << " AND CROSS-SECTIONAL  CONSTANTS  . . . .( NPAR(3) ) . . =" << setw(5) << NUMMAT
+		  << endl
+		  << endl;
+
+	*this << "  SET       YOUNG'S     POISSON" << endl
+		  << " NUMBER     MODULUS      RATIO" << endl
+		  << "               E           NU" << endl;
+
+	*this << setiosflags(ios::scientific) << setprecision(5);
+
+	//	Loop over for all property sets
+	for (unsigned int mset = 0; mset < NUMMAT; mset++)
     {
         *this << setw(5) << mset+1;
 		ElementGroup.GetMaterial(mset).Write(*this);
@@ -202,11 +305,56 @@ void COutputter::OutputBarElements(unsigned int EleGrp)
 	*this << endl << endl
 		  << " E L E M E N T   I N F O R M A T I O N" << endl;
     
-	*this << " ELEMENT     NODE     NODE       MATERIAL" << endl
-		  << " NUMBER-N      I        J       SET NUMBER" << endl;
+	*this << " ELEMENT     NODE     NODE     NODE    MATERIAL" << endl
+		  << " NUMBER-N      1       2        3     SET NUMBER" << endl;
 
 	unsigned int NUME = ElementGroup.GetNUME();
 
+	//	Loop over for all elements in group EleGrp
+	for (unsigned int Ele = 0; Ele < NUME; Ele++)
+    {
+        *this << setw(5) << Ele+1;
+		ElementGroup[Ele].Write(*this);
+    }
+
+	*this << endl;
+}
+
+//	Output T3 element data
+void COutputter::OutputT3Elements(unsigned int EleGrp){
+	CDomain* FEMData = CDomain::GetInstance();
+
+	CElementGroup& ElementGroup = FEMData->GetEleGrpList()[EleGrp];
+	unsigned int NUMMAT = ElementGroup.GetNUMMAT();
+
+	*this << " M A T E R I A L   D E F I N I T I O N" << endl
+		  << endl;
+	*this << " NUMBER OF DIFFERENT SETS OF MATERIAL" << endl;
+	*this << " AND CROSS-SECTIONAL  CONSTANTS  . . . .( NPAR(3) ) . . =" << setw(5) << NUMMAT
+		  << endl
+		  << endl;
+
+	*this << "  SET       YOUNG'S        POSSION" << endl
+		  << " NUMBER     MODULUS         RAITO" << endl
+		  << "               E              nu" << endl;
+
+	*this << setiosflags(ios::scientific) << setprecision(5);
+
+	//	Loop over for all property sets
+	for (unsigned int mset = 0; mset < NUMMAT; mset++)
+    {
+        *this << setw(5) << mset+1;
+		ElementGroup.GetMaterial(mset).Write(*this);
+    }
+
+	*this << endl
+		  << endl
+		  << " E L E M E N T   I N F O R M A T I O N" << endl;
+	*this << " ELEMENT     NODE     NODE      NODE      MATERIAL" << endl
+		  << " NUMBER-N      1        2        3       SET NUMBER" << endl;
+
+	unsigned int NUME = ElementGroup.GetNUME();
+	
 	//	Loop over for all elements in group EleGrp
 	for (unsigned int Ele = 0; Ele < NUME; Ele++)
     {
@@ -247,7 +395,7 @@ void COutputter::OutputBeamElements(unsigned int EleGrp)
 
 	*this << endl << endl
 		  << " E L E M E N T   I N F O R M A T I O N" << endl;
-    
+
 	*this << " ELEMENT     NODE     NODE       MATERIAL" << endl
 		  << " NUMBER-N      I        J       SET NUMBER" << endl;
 
@@ -262,14 +410,16 @@ void COutputter::OutputBeamElements(unsigned int EleGrp)
 
 	*this << endl;
 }
+
+  
 //	Print load data
 void COutputter::OutputLoadInfo()
 {
-	CDomain* FEMData = CDomain::GetInstance();
+	CDomain *FEMData = CDomain::GetInstance();
 
 	for (unsigned int lcase = 1; lcase <= FEMData->GetNLCASE(); lcase++)
 	{
-		CLoadCaseData* LoadData = &FEMData->GetLoadCases()[lcase - 1];
+		CLoadCaseData *LoadData = &FEMData->GetLoadCases()[lcase - 1];
 
 		*this << setiosflags(ios::scientific);
 		*this << " L O A D   C A S E   D A T A" << endl
@@ -290,9 +440,9 @@ void COutputter::OutputLoadInfo()
 //	Print nodal displacement
 void COutputter::OutputNodalDisplacement()
 {
-	CDomain* FEMData = CDomain::GetInstance();
-	CNode* NodeList = FEMData->GetNodeList();
-	double* Displacement = FEMData->GetDisplacement();
+	CDomain *FEMData = CDomain::GetInstance();
+	CNode *NodeList = FEMData->GetNodeList();
+	double *Displacement = FEMData->GetDisplacement();
 
 	*this << setiosflags(ios::scientific);
 
@@ -309,9 +459,9 @@ void COutputter::OutputNodalDisplacement()
 //	Calculate stresses
 void COutputter::OutputElementStress()
 {
-	CDomain* FEMData = CDomain::GetInstance();
+	CDomain *FEMData = CDomain::GetInstance();
 
-	double* Displacement = FEMData->GetDisplacement();
+	double *Displacement = FEMData->GetDisplacement();
 
 	unsigned int NUMEG = FEMData->GetNUMEG();
 
@@ -321,7 +471,7 @@ void COutputter::OutputElementStress()
 			  << EleGrpIndex + 1 << endl
 			  << endl;
 
-		CElementGroup& EleGrp = FEMData->GetEleGrpList()[EleGrpIndex];
+		CElementGroup &EleGrp = FEMData->GetEleGrpList()[EleGrpIndex];
 		unsigned int NUME = EleGrp.GetNUME();
 		ElementTypes ElementType = EleGrp.GetElementType();
 
@@ -331,15 +481,14 @@ void COutputter::OutputElementStress()
 			{	
 				*this << "  ELEMENT             FORCE            STRESS" << endl
 					<< "  NUMBER" << endl;
-
 				double stress;
 
 				for (unsigned int Ele = 0; Ele < NUME; Ele++)
 				{
-					CElement& Element = EleGrp[Ele];
+					CElement &Element = EleGrp[Ele];
 					Element.ElementStress(&stress, Displacement);
 
-					CBarMaterial& material = *dynamic_cast<CBarMaterial*>(Element.GetElementMaterial());
+					CBarMaterial &material = *dynamic_cast<CBarMaterial *>(Element.GetElementMaterial());
 					*this << setw(5) << Ele + 1 << setw(22) << stress * material.Area << setw(18)
 						<< stress << endl;
 				}
@@ -348,14 +497,14 @@ void COutputter::OutputElementStress()
 
 				break;
 			}
+
 			case ElementTypes::Beam: //Beam element
 			{
 				*this << "  ELEMENT             STRESS             TORSION             MOMENT_Y_1             MOMENT_Y_2             MOMENT_Z_1             MOMENT_Z_2             SHEAR_Y             SHEAR_Z" << endl //to be determined
 					<< "  NUMBER" << endl;
 
 				double* stressBeam = new double[8];
-
-				for (unsigned int Ele = 0; Ele < NUME; Ele++)
+                				for (unsigned int Ele = 0; Ele < NUME; Ele++)
 				{
 					CElement& Element = EleGrp[Ele];
 					Element.ElementStress(stressBeam, Displacement);
@@ -374,7 +523,76 @@ void COutputter::OutputElementStress()
 				*this << endl;
 
 				break;
+            }
+
+
+			case ElementTypes::H8: // H8 cube element
+			{
+				*this << "  ELEMENT       S11               S22               S33               S12               S13               S23" << endl;
+
+				double stress[6];
+
+				for (unsigned int Ele = 0; Ele < NUME; Ele++)
+				{
+					CElement &Element = EleGrp[Ele];
+					Element.ElementStress(stress, Displacement);
+					*this << setw(5) << Ele + 1;
+					for (int j = 0; j < 6; j++)
+					{
+						*this << setw(18) << stress[j];
+					}
+					*this << endl;
+				}
+
+				*this << endl;
+
+				break;
 			}
+
+			case ElementTypes::Q4: // Q4 element
+			{
+				*this << "  ELEMENT             STRESS" << endl
+						<< "  NUMBER" << endl;
+				double stress[3] = {0};
+					
+					for (unsigned int Ele = 0; Ele < NUME; Ele++)
+					{
+						CElement& Element = EleGrp[Ele];
+						Element.ElementStress(stress, Displacement);
+
+						CQ4Material& material = *dynamic_cast<CQ4Material*>(Element.GetElementMaterial());
+						*this << setw(5) << Ele + 1;
+						for (int i = 0; i < 3; ++i) {
+							*this << setw(15) << stress[i];
+						}
+						*this << endl;
+					}
+
+					*this << endl;
+
+					break;
+			}
+			
+			case ElementTypes::T3:{
+				*this << "  ELEMENT             STRESS" << endl
+					<< "  NUMBER" << endl;
+				
+				double stress[12]={0};
+
+				for (unsigned int Ele = 0; Ele < NUME; Ele++)
+				{
+					CElement& Element = EleGrp[Ele];
+					Element.ElementStress(stress, Displacement);
+					*this << setw(5) << Ele + 1;
+					for (int i = 0; i < 3; ++i) {
+						*this << setw(15) << stress[i];
+					}
+					*this << endl;
+				}
+				*this << endl;
+				break;
+			}
+                
 			default: // Invalid element type
 				cerr << "*** Error *** Elment type " << ElementType
 					<< " has not been implemented.\n\n";
@@ -385,7 +603,7 @@ void COutputter::OutputElementStress()
 //	Print total system data
 void COutputter::OutputTotalSystemData()
 {
-	CDomain* FEMData = CDomain::GetInstance();
+	CDomain *FEMData = CDomain::GetInstance();
 
 	*this << "	TOTAL SYSTEM DATA" << endl
 		  << endl;
@@ -408,11 +626,11 @@ void COutputter::PrintColumnHeights()
 {
 	*this << "*** _Debug_ *** Column Heights" << endl;
 
-	CDomain* FEMData = CDomain::GetInstance();
+	CDomain *FEMData = CDomain::GetInstance();
 
 	unsigned int NEQ = FEMData->GetNEQ();
 	CSkylineMatrix<double> *StiffnessMatrix = FEMData->GetStiffnessMatrix();
-	unsigned int* ColumnHeights = StiffnessMatrix->GetColumnHeights();
+	unsigned int *ColumnHeights = StiffnessMatrix->GetColumnHeights();
 
 	for (unsigned int col = 0; col < NEQ; col++)
 	{
@@ -433,11 +651,11 @@ void COutputter::PrintDiagonalAddress()
 {
 	*this << "*** _Debug_ *** Address of Diagonal Element" << endl;
 
-	CDomain* FEMData = CDomain::GetInstance();
+	CDomain *FEMData = CDomain::GetInstance();
 
 	unsigned int NEQ = FEMData->GetNEQ();
 	CSkylineMatrix<double> *StiffnessMatrix = FEMData->GetStiffnessMatrix();
-	unsigned int* DiagonalAddress = StiffnessMatrix->GetDiagonalAddress();
+	unsigned int *DiagonalAddress = StiffnessMatrix->GetDiagonalAddress();
 
 	for (unsigned int col = 0; col <= NEQ; col++)
 	{
@@ -458,11 +676,11 @@ void COutputter::PrintStiffnessMatrix()
 {
 	*this << "*** _Debug_ *** Banded stiffness matrix" << endl;
 
-	CDomain* FEMData = CDomain::GetInstance();
+	CDomain *FEMData = CDomain::GetInstance();
 
 	unsigned int NEQ = FEMData->GetNEQ();
 	CSkylineMatrix<double> *StiffnessMatrix = FEMData->GetStiffnessMatrix();
-	unsigned int* DiagonalAddress = StiffnessMatrix->GetDiagonalAddress();
+	unsigned int *DiagonalAddress = StiffnessMatrix->GetDiagonalAddress();
 
 	*this << setiosflags(ios::scientific) << setprecision(5);
 
@@ -509,10 +727,10 @@ void COutputter::PrintDisplacement()
 {
 	*this << "*** _Debug_ *** Displacement vector" << endl;
 
-	CDomain* FEMData = CDomain::GetInstance();
+	CDomain *FEMData = CDomain::GetInstance();
 
 	unsigned int NEQ = FEMData->GetNEQ();
-	double* Force = FEMData->GetForce();
+	double *Force = FEMData->GetForce();
 
 	*this << setiosflags(ios::scientific) << setprecision(5);
 

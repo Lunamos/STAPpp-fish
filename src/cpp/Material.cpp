@@ -16,14 +16,60 @@
 
 using namespace std;
 
-//	Read material data from stream Input
-bool CBarMaterial::Read(ifstream& Input)
+bool CBarMaterial::Read(ifstream &Input)
+{
+	Input >> nset; // Number of property set
+
+	Input >> E >> Area; // Young's modulus and section area
+
+	return true;
+}
+
+void CBarMaterial::Write(COutputter &output)
+{
+	output << setw(16) << E << setw(16) << Area << endl;
+}
+
+bool CQ4Material::Read(ifstream& Input)
 {
 	Input >> nset;	// Number of property set
 
-	Input >> E >> Area;	// Young's modulus and section area
+	Input >> E >> nu;	// Young's modulus and Poisson ratio
 
 	return true;
+}
+
+void CQ4Material::Write(COutputter& output)
+{
+	output << setw(16) << E << setw(16) << nu << endl;
+}
+
+bool CT3Material::Read(ifstream& Input)
+{
+	Input >> nset;	// Number of property set
+
+	Input >> E >> nu;	// Young's modulus and section area
+
+	return true;
+}
+
+void CT3Material::Write(COutputter& output)
+{
+	output << setw(16) << E << setw(16) << nu << endl;
+}
+
+bool CH8Material::Read(ifstream &Input)
+{
+	  Input >> nset; // Number of property set
+
+	  Input >> E >> Nu; // Young's modulus and section area
+  
+  	return true;
+}
+
+void CH8Material::Write(COutputter &output)
+{
+	output << setw(16) << E << setw(16) << Nu << endl;
 }
 
 bool CBeamMaterial::Read(ifstream& Input)
@@ -35,18 +81,10 @@ bool CBeamMaterial::Read(ifstream& Input)
 	return true;
 }
 
-
-//	Write material data to Stream
-void CBarMaterial::Write(COutputter& output)
-{
-	output << setw(16) << E << setw(16) << Area << endl;
-}
-
 void CBeamMaterial::Write(COutputter& output)
 {
 	output << setw(16) << E << setw(16) << Area << setw(16) << Iz << setw(16)
 		   << Iy << setw(16) << Jp << setw(16) << v << y_axis[0] << y_axis[1] << y_axis[2]
 		   << endl;
 }
-
 

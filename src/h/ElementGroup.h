@@ -15,6 +15,9 @@
 #include "Element.h"
 #include "Bar.h"
 #include "Beam.h"
+#include "H8.h"
+#include "Q4.h"
+#include "T3.h"
 #include "Material.h"
 #include "Node.h"
 
@@ -24,13 +27,13 @@ using namespace std;
 enum ElementTypes
 {
     UNDEFINED = 0,
-    Bar,    // Bar element
-    Q4,     // 4Q element
-    T3,     // 3T element
-    H8,     // 8H element
-    Beam,   // Beam element
-    Plate,  // Plate element
-    Shell   // Shell elment
+    Bar,   // Bar element
+    Q4,    // 4Q element
+    T3,    // 3T element
+    H8,    // 8H element
+    Beam,  // Beam element
+    Plate, // Plate element
+    Shell  // Shell elment
 };
 
 //! Element group class
@@ -38,7 +41,7 @@ class CElementGroup
 {
 private:
     //! List of all nodes in the domain, obtained from CDomain object
-    static CNode* NodeList_;
+    static CNode *NodeList_;
 
     //! Element type of this group
     ElementTypes ElementType_;
@@ -50,13 +53,13 @@ private:
     unsigned int NUME_;
 
     //! Element List in this group
-    CElement* ElementList_;
+    CElement *ElementList_;
 
     //! Number of material/section property sets in this group
     unsigned int NUMMAT_;
 
     //! Material list in this group
-    CMaterial* MaterialList_;
+    CMaterial *MaterialList_;
 
     //! Size of an Material object in this group
     std::size_t MaterialSize_;
@@ -69,7 +72,7 @@ public:
     ~CElementGroup();
 
     //! Read element group data from stream Input
-    bool Read(ifstream& Input);
+    bool Read(ifstream &Input);
 
     //! Calculate the size of the derived element class and material class
     void CalculateMemberSize();
@@ -88,10 +91,10 @@ public:
 
     //! operator []
     //! For the sake of efficiency, the index bounds are not checked
-    CElement& operator[](unsigned int i);
+    CElement &operator[](unsigned int i);
 
     //! Return the index-th material in this group
-    CMaterial& GetMaterial(unsigned int i);
+    CMaterial &GetMaterial(unsigned int i);
 
     //! Return the number of material/section property setss in this element group
     unsigned int GetNUMMAT() { return NUMMAT_; }
