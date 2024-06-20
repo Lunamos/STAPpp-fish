@@ -22,7 +22,7 @@ CQ4::CQ4()
 	NEN_ = 4;	// Each element has 4 nodes, 3 dimension
 	nodes_ = new CNode*[NEN_];
     
-    ND_ = 12;
+    ND_ = 24;
     LocationMatrix_ = new unsigned int[ND_];
 
 	ElementMaterial_ = nullptr;
@@ -68,14 +68,17 @@ void CQ4::ElementStiffness(double* Matrix)
     double nu = material_->nu;     
 
     double Gauss_Point[2] = {sqrt(3) / 3, -sqrt(3) / 3}; // 高斯点
-    double xy[4][3]; // 现在是三维的
-    double BtDB[12][12] = {0};
-    double K[12][12] = {0};
+    double xy[4][6]; // 现在是6维的
+    double BtDB[24][24] = {0};
+    double K[24][24] = {0};
 
     // xy矩阵([x,y,z])
     for (unsigned int i = 0; i < 4; i++)
         for (unsigned int j = 0; j < 3; j++)
             xy[i][j] = nodes_[i]->XYZ[j];
+    for (unsigned int i = 0; i < 4; i++)
+        for (unsigned int j = 3; j < 6; j++)
+            xy[i][j] = 0;
 
     // 计算弹性矩阵D
     double factor = E / (1 - nu * nu);
@@ -86,14 +89,14 @@ void CQ4::ElementStiffness(double* Matrix)
     D[1][1] = factor;
     D[2][2] = factor * (1 - nu) / 2;
 
-    // // 打印 D 矩阵
-    // std::cout << "D matrix:" << std::endl;
-    // for (int i = 0; i < 3; i++) {
-    //     for (int j = 0; j < 3; j++) {
-    //         std::cout << D[i][j] << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
+    // 打印 D 矩阵
+    std::cout << "D matrix:" << std::endl;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            std::cout << D[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
 
     for (int s = 0; s < 2; s++) {
         for (int t = 0; t < 2; t++) {
@@ -110,7 +113,7 @@ void CQ4::ElementStiffness(double* Matrix)
             double detJ = 0.0;
             double invJ[2][2] = {0};
             double nablaN[2][4] = {0};
-            double B[3][12] = {0}; // 现在是12列
+            double B[3][24] = {0}; // 3行是固定的,现在是24列
 
             // 计算雅克比矩阵
             for(int i = 0; i < 2; i++)
@@ -118,14 +121,14 @@ void CQ4::ElementStiffness(double* Matrix)
                     for(int k = 0; k < 4; k++)
                         J[i][j] += G[i][k] * xy[k][j];
 
-            // // 打印 J 矩阵
-            // std::cout << "J matrix:" << std::endl;
-            // for (int i = 0; i < 2; i++) {
-            //     for (int j = 0; j < 2; j++) {
-            //         std::cout << J[i][j] << " ";
-            //     }
-            //     std::cout << std::endl;
-            // }
+            // 打印 J 矩阵
+            std::cout << "J matrix:" << std::endl;
+            for (int i = 0; i < 2; i++) {
+                for (int j = 0; j < 2; j++) {
+                    std::cout << J[i][j] << " ";
+                }
+                std::cout << std::endl;
+            }
 
             // 计算雅克比矩阵的伴随矩阵和行列式
             adjJ[0][0] = J[1][1];
@@ -134,22 +137,22 @@ void CQ4::ElementStiffness(double* Matrix)
             adjJ[1][1] = J[0][0];
             detJ = J[0][0] * J[1][1] - J[0][1] * J[1][0];
 
-            // // 打印行列式
-            // std::cout << "detJ: " << detJ << std::endl;
+            // 打印行列式
+            std::cout << "detJ: " << detJ << std::endl;
 
             // 计算雅克比矩阵的逆
             for(int i = 0; i < 2; i++)
                 for(int j = 0; j < 2; j++)
                     invJ[i][j] = adjJ[i][j] / detJ;
 
-            // // 打印 invJ 矩阵
-            // std::cout << "invJ matrix:" << std::endl;
-            // for (int i = 0; i < 2; i++) {
-            //     for (int j = 0; j < 2; j++) {
-            //         std::cout << invJ[i][j] << " ";
-            //     }
-            //     std::cout << std::endl;
-            // }
+            // 打印 invJ 矩阵
+            std::cout << "invJ matrix:" << std::endl;
+            for (int i = 0; i < 2; i++) {
+                for (int j = 0; j < 2; j++) {
+                    std::cout << invJ[i][j] << " ";
+                }
+                std::cout << std::endl;
+            }
 
             // 计算形函数的梯度
             for(int i = 0; i < 2; i++)
@@ -157,57 +160,56 @@ void CQ4::ElementStiffness(double* Matrix)
                     for(int k = 0; k < 2; k++)
                         nablaN[i][j] += invJ[i][k] * G[k][j];
 
-            // // 打印 nablaN 矩阵
-            // std::cout << "nablaN matrix:" << std::endl;
-            // for (int i = 0; i < 2; i++) {
-            //     for (int j = 0; j < 4; j++) {
-            //         std::cout << nablaN[i][j] << " ";
-            //     }
-            //     std::cout << std::endl;
-            // }
+            // 打印 nablaN 矩阵
+            std::cout << "nablaN matrix:" << std::endl;
+            for (int i = 0; i < 2; i++) {
+                for (int j = 0; j < 4; j++) {
+                    std::cout << nablaN[i][j] << " ";
+                }
+                std::cout << std::endl;
+            }
 
             // 计算应变矩阵B
             for(int i = 0; i < 4; i++) {
-                B[0][3*i] = nablaN[0][i];
-                B[1][3*i+1] = nablaN[1][i];
-                B[2][3*i] = nablaN[1][i];
-                B[2][3*i+1] = nablaN[0][i];
+                B[0][6*i] = nablaN[0][i];
+                B[1][6*i+1] = nablaN[1][i];
+                B[2][6*i] = nablaN[1][i];
+                B[2][6*i+1] = nablaN[0][i];
             }
 
-            // // 打印 B 矩阵
-            // std::cout << "B matrix:" << std::endl;
-            // for (int i = 0; i < 3; i++) {
-            //     for (int j = 0; j < 12; j++) {
-            //         std::cout << B[i][j] << " ";
-            //     }
-            //     std::cout << std::endl;
-            // }
+            // 打印 B 矩阵
+            std::cout << "B matrix:" << std::endl;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 24; j++) {
+                    std::cout << B[i][j] << " ";
+                }
+                std::cout << std::endl;
+            }
 
             // 计算BT*D*B并累加到K
-            for(int i = 0; i < 12; i++)
-                for(int j = 0; j < 12; j++)
+            for(int i = 0; i < 24; i++)
+                for(int j = 0; j < 24; j++)
                     for(int k = 0; k < 3; k++)
                         for(int l = 0; l < 3; l++)
                             K[i][j] += B[k][i] * D[k][l] * B[l][j] * detJ;
         }
     }
 
-    // // 打印 K 矩阵
-    // std::cout << "K matrix:" << std::endl;
-    // for (int i = 0; i < 12; i++) {
-    //     for (int j = 0; j < 12; j++) {
-    //         std::cout << K[i][j] << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
+    // 打印 K 矩阵
+    std::cout << "K matrix:" << std::endl;
+    for (int i = 0; i < 12; i++) {
+        for (int j = 0; j < 12; j++) {
+            std::cout << K[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
 
     // 将矩阵的上三角部分存储到一维数组中
     int index = 0;
-    for(int j = 0; j < 12; j++)
+    for(int j = 0; j < 24; j++)
         for(int i = j; i >= 0; i--)
             Matrix[index++] = K[i][j];
 }
-
 
 
 //	Calculate element stress 
@@ -226,13 +228,13 @@ void CQ4::ElementStress(double* stress, double* Displacement)
     D[2][2] = factor * (1 - nu) / 2;
 
     double G0[2][4] = {{-0.25, 0.25, 0.25, -0.25}, {-0.25, -0.25, 0.25, 0.25}};
-    double xy[4][3]; // 现在是三维的
+    double xy[4][6]; // 现在是6维的
     double J[2][2] = {0};
     double adjJ[2][2] = {0};
     double detJ = 0.0;
     double invJ[2][2] = {0};
     double nablaN[2][4] = {0};
-    double B[3][12] = {0}; // 现在是12列
+    double B[3][24] = {0}; // 现在是24列
 
     // xy矩阵([x,y,z])
     for (unsigned int i = 0; i < 4; i++)
@@ -263,62 +265,62 @@ void CQ4::ElementStress(double* stress, double* Displacement)
             for(unsigned int k = 0; k < 2; k++)
                 nablaN[i][j] += invJ[i][k] * G0[k][j];
 
-    // // 打印 nablaN 矩阵
-    // std::cout << "nablaN matrix:" << std::endl;
-    // for (int i = 0; i < 2; i++) {
-    //     for (int j = 0; j < 4; j++) {
-    //         std::cout << nablaN[i][j] << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
+    // 打印 nablaN 矩阵
+    std::cout << "nablaN matrix:" << std::endl;
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 4; j++) {
+            std::cout << nablaN[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
     // 计算应变矩阵B
     for(unsigned int i = 0; i < 4; i++) {
-        B[0][3*i] = nablaN[0][i];
-        B[1][3*i+1] = nablaN[1][i];
-        B[2][3*i] = nablaN[1][i];
-        B[2][3*i+1] = nablaN[0][i];
+        B[0][6*i] = nablaN[0][i];
+        B[1][6*i+1] = nablaN[1][i];
+        B[2][6*i] = nablaN[1][i];
+        B[2][6*i+1] = nablaN[0][i];
     }
 
-    double d[12] = {0}; // 位移
-    for (unsigned int i = 0; i < 12; i++)
+    double d[24] = {0}; // 位移
+    for (unsigned int i = 0; i < 24; i++)
         if (LocationMatrix_[i])
             d[i] = Displacement[LocationMatrix_[i]-1];
 
-    // // 打印d数组
-    // std::cout << "d array: ";
-    // for (unsigned int i = 0; i < 12; i++)
-    //     std::cout << d[i] << " ";
-    // std::cout << std::endl;
+    // 打印d数组
+    std::cout << "d array: ";
+    for (unsigned int i = 0; i < 24; i++)
+        std::cout << d[i] << " ";
+    std::cout << std::endl;
 
-    // std::cout << "Location Matrix: ";
-    // for (unsigned int i = 0; i < 12; i++)
-    //     std::cout << LocationMatrix_[i] << " ";
-    // std::cout << std::endl;
+    std::cout << "Location Matrix: ";
+    for (unsigned int i = 0; i < 24; i++)
+        std::cout << LocationMatrix_[i] << " ";
+    std::cout << std::endl;
     // 计算DB = D*B
-    double DB[3][12] = {0};
+    double DB[3][24] = {0};
     for (unsigned int i = 0; i < 3; i++)
-        for (unsigned int j = 0; j < 12; j++)
+        for (unsigned int j = 0; j < 24; j++)
             for (unsigned int k = 0; k < 3; k++)
                 DB[i][j] += D[i][k] * B[k][j];
 
-    // // 打印DB矩阵
-    // std::cout << "DB matrix:" << std::endl;
-    // for (unsigned int i = 0; i < 3; i++) {
-    //     for (unsigned int j = 0; j < 12; j++)
-    //         std::cout << DB[i][j] << " ";
-    //     std::cout << std::endl;
-    // }
+    // 打印DB矩阵
+    std::cout << "DB matrix:" << std::endl;
+    for (unsigned int i = 0; i < 3; i++) {
+        for (unsigned int j = 0; j < 24; j++)
+            std::cout << DB[i][j] << " ";
+        std::cout << std::endl;
+    }
 
     // 计算stress = DB*d
     for (unsigned int i = 0; i < 3; i++){
         stress[i] = 0.0;
-        for (unsigned int j = 0; j < 12; j++){
+        for (unsigned int j = 0; j < 24; j++){
             stress[i] += DB[i][j] * d[j];
         }
     }
 
-    // // // 打印stress
-    // std::cout << "stress: " << stress[0]<< stress[1]<< stress[2] << std::endl;
+    // // 打印stress
+    std::cout << "stress: " << stress[0]<< stress[1]<< stress[2] << std::endl;
 
 }
 

@@ -22,7 +22,7 @@ CT3::CT3()
 	NEN_ = 3;	// Each element has 3 nodes
 	nodes_ = new CNode*[NEN_];
     
-    ND_ = 9;
+    ND_ = 18;
     LocationMatrix_ = new unsigned int[ND_];
 
 	ElementMaterial_ = nullptr;
@@ -143,42 +143,42 @@ void CT3::ElementStiffness(double* Matrix)
     }
 
     //扩展 K 矩阵，新矩阵的第3列，第6列，第9列，第3行，第6行，第9行都是0，其余部分与原矩阵相同
-    double Ke_[9][9] = {0};
+    double Ke_[18][18] = {0};
     for (int i = 0; i < 2; i++)
         for (int j = 0; j < 2; j++)
             Ke_[i][j] = Ke[i][j];
     
     for (int i = 2; i < 4; i++)
         for (int j = 0; j < 2; j++)
-            Ke_[i+1][j] = Ke[i][j];
+            Ke_[i+4][j] = Ke[i][j];
     
     for (int i = 4; i < 6; i++)
         for (int j = 0; j < 2; j++)
-            Ke_[i+2][j] = Ke[i][j];
+            Ke_[i+8][j] = Ke[i][j];
     
     for (int i = 0; i < 2; i++)
         for (int j = 2; j < 4; j++)
-            Ke_[i][j+1] = Ke[i][j];
+            Ke_[i][j+4] = Ke[i][j];
 
     for (int i = 2; i < 4; i++)
         for (int j = 2; j < 4; j++)
-            Ke_[i+1][j+1] = Ke[i][j];
+            Ke_[i+4][j+4] = Ke[i][j];
     
     for (int i = 4; i < 6; i++)
         for (int j = 2; j < 4; j++)
-            Ke_[i+2][j+1] = Ke[i][j];
+            Ke_[i+8][j+4] = Ke[i][j];
     
     for (int i = 0; i < 2; i++)
         for (int j = 4; j < 6; j++)
-            Ke_[i][j+2] = Ke[i][j];
+            Ke_[i][j+8] = Ke[i][j];
     
     for (int i = 2; i < 4; i++)
         for (int j = 4; j < 6; j++)
-            Ke_[i+1][j+2] = Ke[i][j];
+            Ke_[i+4][j+8] = Ke[i][j];
 
     for (int i = 4; i < 6; i++)
         for (int j = 4; j < 6; j++)
-            Ke_[i+2][j+2] = Ke[i][j];
+            Ke_[i+8][j+8] = Ke[i][j];
 
     // 打印 K 矩阵
     std::cout << "K matrix:" << std::endl;
@@ -191,7 +191,7 @@ void CT3::ElementStiffness(double* Matrix)
 
     // 将 Ke 的值存入输出矩阵 Matrix
     int index = 0;
-    for(int j = 0; j < 9; j++)
+    for(int j = 0; j < 18; j++)
         for(int i = j; i >= 0; i--)
             Matrix[index++] = Ke_[i][j];
 }
@@ -242,13 +242,21 @@ void CT3::ElementStress(double* stress, double* Displacement)
     };
 
     // 计算位移
-    double de[9];
-    for (int j = 0; j < 9; ++j)
+    double de[6];
+    for (int j = 0; j < 3; ++j)
     {
-        de[j] = 0;
-        if (LocationMatrix_[j])
-            de[j] = *(Displacement + (LocationMatrix_[j] - 1));
+        de[2*j] = 0;
+        de[2*j+1] = 0;
+        if (LocationMatrix_[6*j+1])
+            de[2*j+1] = Displacement[LocationMatrix_[6*j+1] - 1];
+        if (LocationMatrix_[6*j])
+            de[2*j] = Displacement[LocationMatrix_[6*j] - 1];
     }
+    
+    std::cout << "d array: ";
+    for (unsigned int i = 0; i < 6; i++)
+        std::cout << de[i] << " ";
+    std::cout << std::endl;
 
     // 计算DB
     double DB[3][6] = {0};
