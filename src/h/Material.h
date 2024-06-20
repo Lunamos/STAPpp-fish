@@ -48,6 +48,7 @@ public:
 	virtual void Write(COutputter &output);
 };
 
+
 class CH8Material : public CMaterial
 {
 public:
@@ -58,4 +59,20 @@ public:
 
 	//!	Write material data to Stream
 	virtual void Write(COutputter &output);
+};
+
+//!	Material class for Q4 element
+class CQ4Material : public CMaterial
+{
+public:
+
+	double nu;	//!< POISSON RATIO OF Q4 ELEMENT
+
+public:
+	
+//!	Read material data from stream Input
+	virtual bool Read(ifstream& Input);
+
+//!	Write material data to Stream
+	virtual void Write(COutputter& output);
 };
