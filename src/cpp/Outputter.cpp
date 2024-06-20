@@ -146,15 +146,15 @@ void COutputter::OutputElementInfo()
 		ElementTypes ElementType = FEMData->GetEleGrpList()[EleGrp].GetElementType();
 		unsigned int NUME = FEMData->GetEleGrpList()[EleGrp].GetNUME();
 
-		*this << " ELEMENT TYPE  . . . . . . . . . . . . .( NPAR(1) ) . . =" << setw(5)
-			  << ElementType << endl;
-		*this << "     EQ.1, TRUSS ELEMENTS" << endl
-			  << "     EQ.2, Q4 ELEMENTS" << endl
-      	<< "     EQ.3, T3 ELEMENTS" << endl
-      	<< "     EQ.4, H8 ELEMENTS" << endl
-      	<< "     EQ.5, BEAM ELEMENTS" << endl
-			  << "     EQ.7, SHELL ELEMENTS" << endl
-			  << endl;
+		*this 	<< " ELEMENT TYPE  . . . . . . . . . . . . .( NPAR(1) ) . . =" << setw(5)
+			  	<< ElementType << endl;
+		*this 	<< "     EQ.1, TRUSS ELEMENTS" << endl
+				<< "     EQ.2, Q4 ELEMENTS" << endl
+      			<< "     EQ.3, T3 ELEMENTS" << endl
+      			<< "     EQ.4, H8 ELEMENTS" << endl
+      			<< "     EQ.5, BEAM ELEMENTS" << endl
+				<< "     EQ.7, SHELL ELEMENTS" << endl
+				<< endl;
 
 		*this << " NUMBER OF ELEMENTS. . . . . . . . . . .( NPAR(2) ) . . =" << setw(5) << NUME
 			  << endl

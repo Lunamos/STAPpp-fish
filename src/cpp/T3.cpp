@@ -133,14 +133,14 @@ void CT3::ElementStiffness(double* Matrix)
         for (int j = 0; j < 6; j++)
             Ke[i][j] = Area * BtDB[i][j];
 
-    // 打印 K 矩阵
-    std::cout << "K matrix:" << std::endl;
-    for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < 6; j++) {
-            std::cout << Ke[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
+    // // 打印 K 矩阵
+    // std::cout << "K matrix:" << std::endl;
+    // for (int i = 0; i < 6; i++) {
+    //     for (int j = 0; j < 6; j++) {
+    //         std::cout << Ke[i][j] << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
 
     //扩展 K 矩阵，新矩阵的第3列，第6列，第9列，第3行，第6行，第9行都是0，其余部分与原矩阵相同
     double Ke_[18][18] = {0};
