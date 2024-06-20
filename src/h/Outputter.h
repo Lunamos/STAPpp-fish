@@ -20,40 +20,38 @@ using namespace std;
 class COutputter
 {
 private:
-
-//!	File stream for output
+	//!	File stream for output
 	ofstream OutputFile;
 
-//!	Designed as a single instance class
-	static COutputter* _instance;
+	//!	Designed as a single instance class
+	static COutputter *_instance;
 
-//! Constructor
-    COutputter(string FileName);
+	//! Constructor
+	COutputter(string FileName);
 
 public:
+	//!	Return pointer to the output file stream
+	inline ofstream *GetOutputFile() { return &OutputFile; }
 
-//!	Return pointer to the output file stream
-	inline ofstream* GetOutputFile() { return &OutputFile; }
+	//!	Return the single instance of the class
+	static COutputter *GetInstance(string FileName = " ");
 
-//!	Return the single instance of the class
-	static COutputter* GetInstance(string FileName = " ");
+	//!	Output current time and date
+	void PrintTime(const struct tm *ptm, COutputter &output);
 
-//!	Output current time and date
-	void PrintTime(const struct tm * ptm, COutputter& output);
-
-//!	Output logo and heading 
+	//!	Output logo and heading
 	void OutputHeading();
 
-//!	Output nodal point data
+	//!	Output nodal point data
 	void OutputNodeInfo();
 
-//!	Output equation numbers
+	//!	Output equation numbers
 	void OutputEquationNumber();
 
-//!	Output element data
+	//!	Output element data
 	void OutputElementInfo();
 
-//!	Output bar element data
+	//!	Output bar element data
 	void OutputBarElements(unsigned int EleGrp);
 
 //!	Output Q4 element data
@@ -62,26 +60,26 @@ public:
 //!	Output load data 
 	void OutputLoadInfo(); 
 
-//!	Output displacement data
+	//!	Output displacement data
 	void OutputNodalDisplacement();
 
-//!	Output element stresses 
+	//!	Output element stresses
 	void OutputElementStress();
 
-//!	Print total system data
+	//!	Print total system data
 	void OutputTotalSystemData();
 
-//! Overload the operator <<
+	//! Overload the operator <<
 	template <typename T>
-	COutputter& operator<<(const T& item) 
+	COutputter &operator<<(const T &item)
 	{
 		std::cout << item;
 		OutputFile << item;
 		return *this;
 	}
 
-	typedef std::basic_ostream<char, std::char_traits<char> > CharOstream;
-	COutputter& operator<<(CharOstream& (*op)(CharOstream&)) 
+	typedef std::basic_ostream<char, std::char_traits<char>> CharOstream;
+	COutputter &operator<<(CharOstream &(*op)(CharOstream &))
 	{
 		op(std::cout);
 		op(OutputFile);
@@ -90,18 +88,19 @@ public:
 
 #ifdef _DEBUG_
 
-//!	Print banded and full stiffness matrix for debuging
+	//!	Print banded and full stiffness matrix for debuging
 	void PrintStiffnessMatrix();
 
-//!	Print address of diagonal elements for debuging
+	//!	Print address of diagonal elements for debuging
 	void PrintDiagonalAddress();
 
-//!	Print column heights for debuging
+	//!	Print column heights for debuging
 	void PrintColumnHeights();
 
-//!	Print displacement vector for debuging
+	//!	Print displacement vector for debuging
 	void PrintDisplacement();
 
 #endif
 
+	void OutputH8Elements(unsigned int EleGrp);
 };

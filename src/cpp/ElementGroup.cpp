@@ -11,22 +11,22 @@
 #include "ElementGroup.h"
 #include "Domain.h"
 
-CNode* CElementGroup::NodeList_ = nullptr;
+CNode *CElementGroup::NodeList_ = nullptr;
 
 //! Constructor
 CElementGroup::CElementGroup()
 {
     if (!NodeList_)
     {
-        CDomain* FEMData = CDomain::GetInstance();
+        CDomain *FEMData = CDomain::GetInstance();
         NodeList_ = FEMData->GetNodeList();
     }
-    
+
     ElementType_ = ElementTypes::UNDEFINED;
-    
+
     NUME_ = 0;
     ElementList_ = nullptr;
-    
+
     NUMMAT_ = 0;
     MaterialList_ = nullptr;
 }
@@ -35,23 +35,23 @@ CElementGroup::CElementGroup()
 CElementGroup::~CElementGroup()
 {
     if (ElementList_)
-        delete [] ElementList_;
-    
+        delete[] ElementList_;
+
     if (MaterialList_)
-        delete [] MaterialList_;
+        delete[] MaterialList_;
 }
 
 //! operator []
 //! For the sake of efficiency, the index bounds are not checked
-CElement& CElementGroup::operator[](unsigned int i)
+CElement &CElementGroup::operator[](unsigned int i)
 {
-    return *(CElement*)((std::size_t)(ElementList_) + i*ElementSize_);
+    return *(CElement *)((std::size_t)(ElementList_) + i * ElementSize_);
 }
 
 //! Return index-th material in this element group
-CMaterial& CElementGroup::GetMaterial(unsigned int i)
+CMaterial &CElementGroup::GetMaterial(unsigned int i)
 {
-    return *(CMaterial*)((std::size_t)(MaterialList_) + i*MaterialSize_);
+    return *(CMaterial *)((std::size_t)(MaterialList_) + i * MaterialSize_);
 }
 
 //! Calculate the size of the derived element and material class
@@ -69,6 +69,10 @@ void CElementGroup::CalculateMemberSize()
             ElementSize_ = sizeof(CQ4);
             MaterialSize_ = sizeof(CQ4Material);
             break;
+        case ElementTypes::H8:
+            ElementSize_ = sizeof(CH8);
+            MaterialSize_ = sizeof(CH8Material);
+            break;
         default:
             std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::CalculateMemberSize." << std::endl;
             exit(5);
@@ -79,13 +83,16 @@ void CElementGroup::CalculateMemberSize()
 //! Allocate array of derived elements
 void CElementGroup::AllocateElements(std::size_t size)
 {
-    switch(ElementType_)
+    switch (ElementType_)
     {
         case ElementTypes::Bar:
             ElementList_ = new CBar[size];
             break;
         case ElementTypes::Q4:
             ElementList_ = new CQ4[size];
+            break;
+        case ElementTypes::H8:
+            ElementList_ = new CH8[size];
             break;
         default:
             std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::AllocateElement." << std::endl;
@@ -96,13 +103,16 @@ void CElementGroup::AllocateElements(std::size_t size)
 //! Allocate array of derived materials
 void CElementGroup::AllocateMaterials(std::size_t size)
 {
-    switch(ElementType_)
+    switch (ElementType_)
     {
         case ElementTypes::Bar:
             MaterialList_ = new CBarMaterial[size];
             break;
         case ElementTypes::Q4:
             MaterialList_ = new CQ4Material[size];
+            break;
+        case ElementTypes::H8:
+            MaterialList_ = new CH8Material[size];
             break;
         default:
             std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::AllocateMaterial." << std::endl;
@@ -111,46 +121,46 @@ void CElementGroup::AllocateMaterials(std::size_t size)
 }
 
 //! Read element group data from stream Input
-bool CElementGroup::Read(ifstream& Input)
+bool CElementGroup::Read(ifstream &Input)
 {
-    Input >> (int&)ElementType_ >> NUME_ >> NUMMAT_;
-    
+    Input >> (int &)ElementType_ >> NUME_ >> NUMMAT_;
+
     CalculateMemberSize();
 
-//  Read material/section property lines
+    //  Read material/section property lines
     AllocateMaterials(NUMMAT_);
-    
-//  Loop over for all material property sets in this element group
+
+    //  Loop over for all material property sets in this element group
     for (unsigned int mset = 0; mset < NUMMAT_; mset++)
     {
         GetMaterial(mset).Read(Input);
-  
+
         if (GetMaterial(mset).nset != mset + 1)
         {
             cerr << "*** Error *** Material sets must be inputted in order !" << endl
-            << "    Expected set : " << mset + 1 << endl
-            << "    Provided set : " << GetMaterial(mset).nset << endl;
-        
+                 << "    Expected set : " << mset + 1 << endl
+                 << "    Provided set : " << GetMaterial(mset).nset << endl;
+
             return false;
         }
     }
 
-//  Read element data lines
+    //  Read element data lines
     AllocateElements(NUME_);
-    
-//  Loop over for all elements in this element group
+
+    //  Loop over for all elements in this element group
     for (unsigned int Ele = 0; Ele < NUME_; Ele++)
     {
         unsigned int N;
-        
-        Input >> N;    // element number
-        
+
+        Input >> N; // element number
+
         if (N != Ele + 1)
         {
             cerr << "*** Error *** Elements must be inputted in order !" << endl
-            << "    Expected element : " << Ele + 1 << endl
-            << "    Provided element : " << N << endl;
-            
+                 << "    Expected element : " << Ele + 1 << endl
+                 << "    Provided element : " << N << endl;
+
             return false;
         }
 

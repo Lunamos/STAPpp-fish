@@ -17,22 +17,31 @@
 using namespace std;
 
 //	Read material data from stream Input
-bool CBarMaterial::Read(ifstream& Input)
+bool CBarMaterial::Read(ifstream &Input)
 {
-	Input >> nset;	// Number of property set
+	Input >> nset; // Number of property set
 
-	Input >> E >> Area;	// Young's modulus and section area
+	Input >> E >> Area; // Young's modulus and section area
 
 	return true;
 }
 
 //	Write material data to Stream
-void CBarMaterial::Write(COutputter& output)
+void CBarMaterial::Write(COutputter &output)
 {
 	output << setw(16) << E << setw(16) << Area << endl;
 }
 
 //	Read material data from stream Input
+bool CH8Material::Read(ifstream &Input)
+{
+	  Input >> nset; // Number of property set
+
+	  Input >> E >> Nu; // Young's modulus and section area
+  
+  	return true;
+}
+
 bool CQ4Material::Read(ifstream& Input)
 {
 	Input >> nset;	// Number of property set
@@ -43,6 +52,11 @@ bool CQ4Material::Read(ifstream& Input)
 }
 
 //	Write material data to Stream
+void CH8Material::Write(COutputter &output)
+{
+	output << setw(16) << E << setw(16) << Nu << endl;
+}
+
 void CQ4Material::Write(COutputter& output)
 {
 	output << setw(16) << E << setw(16) << nu << endl;
