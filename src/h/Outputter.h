@@ -60,6 +60,9 @@ public:
 //!	Output beam element data
 	void OutputBeamElements(unsigned int EleGrp);
 
+//!	Output shell element data
+	void OutputShellElements(unsigned int EleGrp);
+
 //!	Output load data 
 	void OutputLoadInfo(); 
 

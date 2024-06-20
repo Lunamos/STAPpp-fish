@@ -30,6 +30,22 @@ void CBarMaterial::Write(COutputter &output)
 	output << setw(16) << E << setw(16) << Area << endl;
 }
 
+bool CShellMaterial::Read(ifstream& Input)
+{
+	Input >> nset;	// Number of property set
+
+	Input >> E >> nu >> thickness;	// Young's modulus, Poisson ratio and thickness
+
+	return true;
+}
+
+
+void CShellMaterial::Write(COutputter& output)
+{
+	output << setw(16) << E << setw(16) << nu << setw(16) << thickness << endl;
+}
+
+
 bool CQ4Material::Read(ifstream& Input)
 {
 	Input >> nset;	// Number of property set
@@ -87,4 +103,3 @@ void CBeamMaterial::Write(COutputter& output)
 		   << Iy << setw(16) << Jp << setw(16) << v << y_axis[0] << y_axis[1] << y_axis[2]
 		   << endl;
 }
-

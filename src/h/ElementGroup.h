@@ -20,6 +20,7 @@
 #include "T3.h"
 #include "Material.h"
 #include "Node.h"
+#include "Shell.h"
 
 using namespace std;
 
