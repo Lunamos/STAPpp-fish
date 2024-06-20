@@ -21,7 +21,7 @@ CH8::CH8()
     NEN_ = 8; // Each element has 2 nodes
     nodes_ = new CNode *[NEN_];
 
-    ND_ = 24;
+    ND_ = 48;
     LocationMatrix_ = new unsigned int[ND_];
 
     ElementMaterial_ = nullptr;
@@ -64,7 +64,7 @@ void CH8::Write(COutputter &output)
            << setw(9) << nodes_[7]->NodeNumber << setw(12) << ElementMaterial_->nset << endl;
 }
 
-unsigned int CH8::SizeOfStiffnessMatrix() { return 300; }
+unsigned int CH8::SizeOfStiffnessMatrix() { return 1176; }
 // added to increase processing speed
 
 //	Calculate element stiffness matrix
@@ -79,11 +79,16 @@ void CH8::ElementStiffness(double *Matrix)
     double nv = material_->Nu;
     double mu = E / (1 + nv);
     double lbd = nv * E / ((1 + nv) * (1 - 2 * nv));
+    double D[6][6] = {0};
+    D[0][0] = D[1][1] = D[2][2] = mu + lbd;
+    D[0][1] = D[0][2] = D[1][2] = D[1][0] = D[2][0] = D[2][1] = lbd;
+    D[3][3] = D[4][4] = D[5][5] = mu;
 
     double gauss[2];
     gauss[0] = -1 / sqrt(3);
     gauss[1] = 1 / sqrt(3);
     int p = 0;
+    double K[48][48] = {0};
 
     for (unsigned int m = 0; m < 2; m++)
     {
@@ -158,27 +163,59 @@ void CH8::ElementStiffness(double *Matrix)
                 invJ[6] = invDet * (J[3] * J[7] - J[4] * J[6]);
                 invJ[7] = invDet * (J[1] * J[6] - J[0] * J[7]);
                 invJ[8] = invDet * (J[0] * J[4] - J[1] * J[3]);
-
-                // calculate strain matrix B, store column by column
-                double B[144] = {0};
-                for (int i = 0; i < 24; i += 3)
+                double nablaN[3][8] = {0};
+                for (int i = 0; i < 3; i++)
                 {
-                    B[i * 6] = B[i * 6 + 9] = B[i * 6 + 16] = invJ[0] * G[i] + invJ[1] * G[i + 1] + invJ[2] * G[i + 2];
-                    B[i * 6 + 3] = B[i * 6 + 7] = B[i * 6 + 17] = invJ[3] * G[i] + invJ[4] * G[i + 1] + invJ[5] * G[i + 2];
-                    B[i * 6 + 4] = B[i * 6 + 11] = B[i * 6 + 14] = invJ[6] * G[i] + invJ[7] * G[i + 1] + invJ[8] * G[i + 2];
-                }
-
-                // calculate stiffness matrix, store column by column
-                p = 0;
-                for (int j = 0; j < 24; ++j)
-                {
-                    for (int i = j; i >= 0; i--)
+                    for (int j = 0; j < 8; j++)
                     {
-                        int ib = i * 6 - 1;
-                        int jb = j * 6 - 1;
-                        Matrix[p++] += (lbd * (B[ib + 1] * (B[jb + 2] + B[jb + 3]) + B[ib + 2] * (B[jb + 1] + B[jb + 3]) + B[ib + 3] * (B[jb + 1] + B[jb + 2])) + (mu + lbd) * (B[ib + 1] * B[jb + 1] + B[ib + 2] * B[jb + 2] + B[ib + 3] * B[jb + 3]) + mu * (B[ib + 4] * B[jb + 4] + B[ib + 5] * B[jb + 5] + B[ib + 6] * B[jb + 6])) * detJ;
+                        for (int k = 0; k < 3; k++)
+                        {
+                            nablaN[i][j] += invJ[i * 3 + k] * G[j * 3 + k];
+                        }
                     }
                 }
+
+                // 打印 nablaN 矩阵
+                /*std::cout << "nablaN matrix:" << std::endl;
+                for (int i = 0; i < 2; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        std::cout << nablaN[i][j] << " ";
+                    }
+                    std::cout << std::endl;
+                }*/
+                ;
+
+                // 计算应变矩阵B
+                double B[6][48] = {0};
+                for (int i = 0; i < 8; i++)
+                {
+                    B[0][6 * i] = B[3][6 * i + 1] = B[4][6 * i + 2] += nablaN[0][i];
+                    B[1][6 * i + 1] = B[3][6 * i] = B[5][6 * i + 2] = nablaN[1][i];
+                    B[2][6 * i + 2] = B[4][6 * i] = B[5][6 * i + 1] = nablaN[2][i];
+                }
+
+                // 打印 B 矩阵
+                /*std::cout << "B matrix:" << std::endl;
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 24; j++) {
+                        std::cout << B[i][j] << " ";
+                    }
+                    std::cout << std::endl;
+                }*/
+                ;
+
+                // 计算BT*D*B并累加到K
+
+                for (int i = 0; i < 48; i++)
+                    for (int j = 0; j < 48; j++)
+                        for (int k = 0; k < 6; k++)
+                            for (int l = 0; l < 6; l++)
+                                K[i][j] += B[k][i] * D[k][l] * B[l][j] * detJ;
+                // 将矩阵的上三角部分存储到一维数组中
+                int index = 0;
+                for (int j = 0; j < 48; j++)
+                    for (int i = j; i >= 0; i--)
+                        Matrix[index++] = K[i][j];
             }
         }
     }

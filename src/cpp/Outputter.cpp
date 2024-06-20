@@ -174,14 +174,13 @@ void COutputter::OutputElementInfo()
 			case ElementTypes::H8: // H8 cube element
 				OutputH8Elements(EleGrp);
 				break;
-      case ElementTypes::Beam: // Beam element
+      		case ElementTypes::Beam: // Beam element
 				OutputBeamElements(EleGrp);
 				break;
-      case ElementTypes::Shell: // Shell element
+      		case ElementTypes::Shell: // Shell element
 				OutputShellElements(EleGrp);
 				break;
-		    default:
-		  default:
+		  	default:
 		        *this << ElementType << " has not been implemented yet." << endl;
 		        break;
 		}
@@ -548,6 +547,7 @@ void COutputter::OutputElementStress()
 
 				break;
 			}
+
 			case ElementTypes::Shell: // Shell element
 			{
 				*this << "  ELEMENT             STRESS_X			STRESS_Y			STRESS_Z			MOMENT_X			MOMENT_Y			SHEAR_Z" << endl
@@ -566,7 +566,7 @@ void COutputter::OutputElementStress()
 
 				delete[] stress;
         
-        *this << endl;
+        		*this << endl;
 
 				break;
 			}
@@ -578,7 +578,7 @@ void COutputter::OutputElementStress()
 					<< "  NUMBER" << endl;
 
 				double* stressBeam = new double[8];
-                				for (unsigned int Ele = 0; Ele < NUME; Ele++)
+                for (unsigned int Ele = 0; Ele < NUME; Ele++)
 				{
 					CElement& Element = EleGrp[Ele];
 					Element.ElementStress(stressBeam, Displacement);
@@ -589,7 +589,6 @@ void COutputter::OutputElementStress()
 						  << stressBeam[2] << setw(22) << stressBeam[3] << setw(22) << stressBeam[4] << setw(22)
 						  << stressBeam[5] << setw(22) << stressBeam[6] << setw(22) << stressBeam[7]
 						  << endl; // to be determined
-					
 				}
 			
 				delete[] stressBeam;
@@ -617,7 +616,7 @@ void COutputter::OutputElementStress()
 					}
 					*this << endl;
 				}
-
+			}
 
 			case ElementTypes::Q4: // Q4 element
 			{
@@ -632,7 +631,8 @@ void COutputter::OutputElementStress()
 
 						CQ4Material& material = *dynamic_cast<CQ4Material*>(Element.GetElementMaterial());
 						*this << setw(5) << Ele + 1;
-						for (int i = 0; i < 3; ++i) {
+						for (int i = 0; i < 3; ++i)
+						{
 							*this << setw(15) << stress[i];
 						}
 						*this << endl;
@@ -643,7 +643,8 @@ void COutputter::OutputElementStress()
 					break;
 			}
 			
-			case ElementTypes::T3:{
+			case ElementTypes::T3:
+			{
 				*this << "  ELEMENT             STRESS" << endl
 					<< "  NUMBER" << endl;
 				
@@ -653,7 +654,8 @@ void COutputter::OutputElementStress()
 					CElement& Element = EleGrp[Ele];
 					Element.ElementStress(stress, Displacement);
 					*this << setw(5) << Ele + 1;
-					for (int i = 0; i < 3; ++i) {
+					for (int i = 0; i < 3; ++i) 
+					{
 						*this << setw(15) << stress[i];
 					}
 					*this << endl;
@@ -687,6 +689,7 @@ void COutputter::OutputTotalSystemData()
 		  << endl
 		  << endl;
 }
+
 
 #ifdef _DEBUG_
 

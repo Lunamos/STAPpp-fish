@@ -1,5 +1,5 @@
 TITLE : Convergence study for beam element.Mesh: 1
-        (17:22:50 on June 8, 2024, Saturday)
+        (22:21:33 on June 20, 2024, Thursday)
 
 C O N T R O L   I N F O R M A T I O N
 
@@ -43,9 +43,11 @@ C O N T R O L   I N F O R M A T I O N
 
  ELEMENT TYPE  . . . . . . . . . . . . .( NPAR(1) ) . . =    5
      EQ.1, TRUSS ELEMENTS
-     EQ.2, ELEMENTS CURRENTLY
+     EQ.2, Q4 ELEMENTS
+     EQ.3, T3 ELEMENTS
+     EQ.4, H8 ELEMENTS
      EQ.5, BEAM ELEMENTS
-     EQ.3, NOT AVAILABLE
+     EQ.7, SHELL ELEMENTS
 
  NUMBER OF ELEMENTS. . . . . . . . . . .( NPAR(2) ) . . =    1
 
@@ -65,15 +67,6 @@ C O N T R O L   I N F O R M A T I O N
  NUMBER-N      I        J       SET NUMBER
     1          1        2           1
 
-   Ele =        Location Matrix
-        1    0    0    0    0    0    0    0    1    0    0    0    2
-
-*** _Debug_ *** Column Heights
-       0       1
-
-*** _Debug_ *** Address of Diagonal Element
-       1       2       4
-
 	TOTAL SYSTEM DATA
 
      NUMBER OF EQUATIONS . . . . . . . . . . . . . .(NEQ) = 2
@@ -82,25 +75,8 @@ C O N T R O L   I N F O R M A T I O N
      MEAN HALF BANDWIDTH . . . . . . . . . . . . . .(MM ) = 1
 
 
-*** _Debug_ *** Banded stiffness matrix
-   1.00000e+00   3.33333e+01  -5.00000e+00
-
-*** _Debug_ *** Full stiffness matrix
-   1.00000e+00  -5.00000e+00
-  -5.00000e+00   3.33333e+01
-
-*** _Debug_ *** Banded stiffness matrix
-   1.00000e+00   8.33333e+00  -5.00000e+00
-
-*** _Debug_ *** Full stiffness matrix
-   1.00000e+00  -5.00000e+00
-  -5.00000e+00   8.33333e+00
-
  LOAD CASE    1
 
-
-*** _Debug_ *** Displacement vector
-  -1.50000e+02  -2.00000e+01
 
  D I S P L A C E M E N T S
 
@@ -117,9 +93,9 @@ C O N T R O L   I N F O R M A T I O N
 
  S O L U T I O N   T I M E   L O G   I N   S E C 
 
-     TIME FOR INPUT PHASE = 1.39400e-03
-     TIME FOR CALCULATION OF STIFFNESS MATRIX = 6.68000e-04
-     TIME FOR FACTORIZATION AND LOAD CASE SOLUTIONS = 1.98000e-04
+     TIME FOR INPUT PHASE = 1.15400e-03
+     TIME FOR CALCULATION OF STIFFNESS MATRIX = 1.70000e-04
+     TIME FOR FACTORIZATION AND LOAD CASE SOLUTIONS = 1.05000e-04
 
-     T O T A L   S O L U T I O N   T I M E = 2.26000e-03
+     T O T A L   S O L U T I O N   T I M E = 1.42900e-03
 
