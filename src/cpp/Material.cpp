@@ -61,3 +61,17 @@ void CQ4Material::Write(COutputter& output)
 {
 	output << setw(16) << E << setw(16) << nu << endl;
 }
+
+bool CT3Material::Read(ifstream& Input)
+{
+	Input >> nset;	// Number of property set
+
+	Input >> E >> nu;	// Young's modulus and section area
+
+	return true;
+}
+
+void CT3Material::Write(COutputter& output)
+{
+	output << setw(16) << E << setw(16) << nu << endl;
+}

@@ -51,11 +51,11 @@ public:
 	//!	Output element data
 	void OutputElementInfo();
 
-	//!	Output bar element data
+	//!	Output element data
 	void OutputBarElements(unsigned int EleGrp);
-
-//!	Output Q4 element data
 	void OutputQ4Elements(unsigned int EleGrp);
+	void OutputH8Elements(unsigned int EleGrp);
+	void OutputT3Elements(unsigned int EleGrp);
 
 //!	Output load data 
 	void OutputLoadInfo(); 
@@ -101,6 +101,4 @@ public:
 	void PrintDisplacement();
 
 #endif
-
-	void OutputH8Elements(unsigned int EleGrp);
 };

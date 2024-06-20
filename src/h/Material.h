@@ -76,3 +76,19 @@ public:
 //!	Write material data to Stream
 	virtual void Write(COutputter& output);
 };
+
+class CT3Material : public CMaterial
+{
+public:
+
+	double nu;	//!< POISSON RATIO OF T3 ELEMENT
+
+public:
+
+//!	Read material data from stream Input
+	virtual bool Read(ifstream& Input);
+
+//!	Write material data to Stream
+	virtual void Write(COutputter& output);
+
+};
