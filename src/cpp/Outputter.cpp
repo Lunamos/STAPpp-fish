@@ -378,86 +378,74 @@ void COutputter::OutputElementStress()
 
 		switch (ElementType)
 		{
-		case ElementTypes::Bar: // Bar element
-		{
-			*this << "  ELEMENT             FORCE            STRESS" << endl
-				  << "  NUMBER" << endl;
-			double stress;
-
-			for (unsigned int Ele = 0; Ele < NUME; Ele++)
+			case ElementTypes::Bar: // Bar element
 			{
-				CElement &Element = EleGrp[Ele];
-				Element.ElementStress(&stress, Displacement);
-
-				CBarMaterial &material = *dynamic_cast<CBarMaterial *>(Element.GetElementMaterial());
-				*this << setw(5) << Ele + 1 << setw(22) << stress * material.Area << setw(18)
-					  << stress << endl;
-			}
-
-			*this << endl;
-
-			break;
-		}
-		case ElementTypes::H8: // H8 cube element
-		{
-			*this << "  ELEMENT       S11               S22               S33               S12               S13               S23" << endl;
-
-			double stress[6];
-
-			for (unsigned int Ele = 0; Ele < NUME; Ele++)
-			{
-				CElement &Element = EleGrp[Ele];
-				Element.ElementStress(stress, Displacement);
-				*this << setw(5) << Ele + 1;
-				for (int j = 0; j < 6; j++)
-				{
-					*this << setw(18) << stress[j];
-				}
-				*this << endl;
-			}
-
-			*this << endl;
-
-			break;
-		}
-
-			// case ElementTypes::Q4: // Q4 element
-            //     *this << "  ELEMENT             STRESS" << endl
-            //         << "  NUMBER          σx          σy         τxy" << endl;
-
-            //     double* stress[3]; // Assuming stress has three components: σx, σy, τxy
-
-            //     for (unsigned int Ele = 0; Ele < NUME; Ele++)
-            //     {
-            //         CElement& Element = EleGrp[Ele];
-            //         Element.ElementStress(stress, Displacement);
-
-            //         *this << setw(5) << Ele + 1 << setw(14) << stress[0] << setw(14)
-            //             << stress[1] << setw(14) << stress[2] << endl;
-            //     }
-			case ElementTypes::Q4: // Q4 element
-				*this << "  ELEMENT             STRESS" << endl
+				*this << "  ELEMENT             FORCE            STRESS" << endl
 					<< "  NUMBER" << endl;
-		    double stress[3] = {0};
-				
+				double stress;
+
 				for (unsigned int Ele = 0; Ele < NUME; Ele++)
 				{
-					CElement& Element = EleGrp[Ele];
-					Element.ElementStress(stress, Displacement);
+					CElement &Element = EleGrp[Ele];
+					Element.ElementStress(&stress, Displacement);
 
-					CQ4Material& material = *dynamic_cast<CQ4Material*>(Element.GetElementMaterial());
-					*this << setw(5) << Ele + 1;
-					for (int i = 0; i < 3; ++i) {
-						*this << setw(15) << stress[i];
-					}
-					*this << endl;
-					// *this << setw(5) << Ele + 1 << setw(22)	<< stress << endl;
+					CBarMaterial &material = *dynamic_cast<CBarMaterial *>(Element.GetElementMaterial());
+					*this << setw(5) << Ele + 1 << setw(22) << stress * material.Area << setw(18)
+						<< stress << endl;
 				}
 
 				*this << endl;
 
 				break;
+			}
 
+			case ElementTypes::H8: // H8 cube element
+			{
+				*this << "  ELEMENT       S11               S22               S33               S12               S13               S23" << endl;
+
+				double stress[6];
+
+				for (unsigned int Ele = 0; Ele < NUME; Ele++)
+				{
+					CElement &Element = EleGrp[Ele];
+					Element.ElementStress(stress, Displacement);
+					*this << setw(5) << Ele + 1;
+					for (int j = 0; j < 6; j++)
+					{
+						*this << setw(18) << stress[j];
+					}
+					*this << endl;
+				}
+
+				*this << endl;
+
+				break;
+			}
+
+			case ElementTypes::Q4: // Q4 element
+			{
+				*this << "  ELEMENT             STRESS" << endl
+						<< "  NUMBER" << endl;
+				double stress[3] = {0};
+					
+					for (unsigned int Ele = 0; Ele < NUME; Ele++)
+					{
+						CElement& Element = EleGrp[Ele];
+						Element.ElementStress(stress, Displacement);
+
+						CQ4Material& material = *dynamic_cast<CQ4Material*>(Element.GetElementMaterial());
+						*this << setw(5) << Ele + 1;
+						for (int i = 0; i < 3; ++i) {
+							*this << setw(15) << stress[i];
+						}
+						*this << endl;
+					}
+
+					*this << endl;
+
+					break;
+			}
+			
 			default: // Invalid element type
 				cerr << "*** Error *** Elment type " << ElementType
 					<< " has not been implemented.\n\n";

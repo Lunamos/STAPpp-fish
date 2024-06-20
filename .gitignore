@@ -1,3 +1,5 @@
 # Ignore .vscode and build directories inside src
 src/.vscode/
 src/build/
+.vscode/
+build/
