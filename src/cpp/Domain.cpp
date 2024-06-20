@@ -274,7 +274,6 @@ void CDomain::AssembleStiffnessMatrix()
 
 		unsigned int size = ElementGrp[0].SizeOfStiffnessMatrix();
 		double* Matrix = new double[size];
-
 //		Loop over for all elements in group EleGrp
 		for (unsigned int Ele = 0; Ele < NUME; Ele++)
         {

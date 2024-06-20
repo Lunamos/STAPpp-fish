@@ -9,8 +9,6 @@
 /*****************************************************************************/
 
 #include "Domain.h"
-#include "Bar.h"
-#include "Shell.h"
 #include "Outputter.h"
 #include "Clock.h"
 
@@ -73,10 +71,8 @@ int main(int argc, char *argv[])
 	FEMData->AllocateMatrices();
 
     cout << "Allocated Matrics" << endl;
-    
 //  Assemble the banded gloabl stiffness matrix
 	FEMData->AssembleStiffnessMatrix();
-    
     double time_assemble = timer.ElapsedTime();
 
 //  Solve the linear equilibrium equations for displacements

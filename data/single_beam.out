@@ -1,0 +1,122 @@
+TITLE : An test data file for a 3d beam with moment on right node
+        (10:36:23 on June 8, 2024, Saturday)
+
+C O N T R O L   I N F O R M A T I O N
+
+      NUMBER OF NODAL POINTS . . . . . . . . . . (NUMNP)  =     2
+      NUMBER OF ELEMENT GROUPS . . . . . . . . . (NUMEG)  =     1
+      NUMBER OF LOAD CASES . . . . . . . . . . . (NLCASE) =     1
+      SOLUTION MODE  . . . . . . . . . . . . . . (MODEX)  =     1
+         EQ.0, DATA CHECK
+         EQ.1, EXECUTION
+
+ N O D A L   P O I N T   D A T A
+
+    NODE       BOUNDARY                         NODAL POINT
+   NUMBER  CONDITION  CODES                     COORDINATES
+        1    1    1    1    1    1    1       0.00000e+00    0.00000e+00    0.00000e+00
+        2    1    0    1    1    1    0       1.00000e+01    0.00000e+00    0.00000e+00
+
+ EQUATION NUMBERS
+
+   NODE NUMBER   DEGREES OF FREEDOM
+        N           X    Y    Z
+        1           0    0    0    0    0    0
+        2           0    1    0    0    0    2
+
+ L O A D   C A S E   D A T A
+
+     LOAD CASE NUMBER . . . . . . . =     1
+     NUMBER OF CONCENTRATED LOADS . =     1
+
+    NODE       DIRECTION      LOAD
+   NUMBER                   MAGNITUDE
+      2            6        1.00000e+01
+
+ E L E M E N T   G R O U P   D A T A
+
+
+ E L E M E N T   D E F I N I T I O N
+
+ ELEMENT TYPE  . . . . . . . . . . . . .( NPAR(1) ) . . =    5
+     EQ.1, TRUSS ELEMENTS
+     EQ.2, ELEMENTS CURRENTLY
+     EQ.5, BEAM ELEMENTS
+     EQ.3, NOT AVAILABLE
+
+ NUMBER OF ELEMENTS. . . . . . . . . . .( NPAR(2) ) . . =    1
+
+ M A T E R I A L   D E F I N I T I O N
+
+ NUMBER OF DIFFERENT SETS OF MATERIAL
+ AND CROSS-SECTIONAL  CONSTANTS  . . . .( NPAR(3) ) . . =    1
+
+  SET       YOUNG'S     CROSS-SECTIONAL     MOMENT OF INERTIA     MOMENT OF INERTIA      MOMENT OF INERTIA     POISSON
+ NUMBER     MODULUS          AREA             ABOUT Z AXIS      	  ABOUT Y AXIS		   		 POLAR        	  RATIO
+               E              A					  Iz					   Iy				 	   Jp		        v
+    1     1.00000e+03     1.00000e+00     8.33300e-02     8.33300e-02     0.00000e+00     3.00000e-010.00000e+001.00000e+000.00000e+00
+
+
+ E L E M E N T   I N F O R M A T I O N
+ ELEMENT     NODE     NODE       MATERIAL
+ NUMBER-N      I        J       SET NUMBER
+    1          1        2           1
+
+   Ele =        Location Matrix
+        1    0    0    0    0    0    0    0    1    0    0    0    2
+
+*** _Debug_ *** Column Heights
+       0       1
+
+*** _Debug_ *** Address of Diagonal Element
+       1       2       4
+
+	TOTAL SYSTEM DATA
+
+     NUMBER OF EQUATIONS . . . . . . . . . . . . . .(NEQ) = 2
+     NUMBER OF MATRIX ELEMENTS . . . . . . . . . . .(NWK) = 3
+     MAXIMUM HALF BANDWIDTH  . . . . . . . . . . . .(MK ) = 2
+     MEAN HALF BANDWIDTH . . . . . . . . . . . . . .(MM ) = 1
+
+
+*** _Debug_ *** Banded stiffness matrix
+   9.99960e-01   3.33320e+01  -4.99980e+00
+
+*** _Debug_ *** Full stiffness matrix
+   9.99960e-01  -4.99980e+00
+  -4.99980e+00   3.33320e+01
+
+*** _Debug_ *** Banded stiffness matrix
+   9.99960e-01   8.33300e+00  -5.00000e+00
+
+*** _Debug_ *** Full stiffness matrix
+   9.99960e-01  -5.00000e+00
+  -5.00000e+00   8.33300e+00
+
+ LOAD CASE    1
+
+
+*** _Debug_ *** Displacement vector
+   6.00024e+00   1.20005e+00
+
+ D I S P L A C E M E N T S
+
+  NODE           X-DISPLACEMENT    Y-DISPLACEMENT    Z-DISPLACEMENT    X-ANGLE    Y-ANGLE    Z-ANGLE
+    1               0.00000e+00       0.00000e+00       0.00000e+00       0.00000e+00       0.00000e+00       0.00000e+00
+    2               0.00000e+00       6.00024e+00       0.00000e+00       0.00000e+00       0.00000e+00       1.20005e+00
+
+ S T R E S S  C A L C U L A T I O N S  F O R  E L E M E N T  G R O U P    1
+
+  ELEMENT             STRESS             TORSION             MOMENT_Y_1             MOMENT_Y_2             MOMENT_Z_1             MOMENT_Z_2             SHEAR_Y             SHEAR_Z
+  NUMBER
+    1           0.00000e+00           0.00000e+00           0.00000e+00           0.00000e+00           1.00000e+01           1.00000e+01          -7.40119e-17           0.00000e+00
+
+
+ S O L U T I O N   T I M E   L O G   I N   S E C 
+
+     TIME FOR INPUT PHASE = 2.04300e-03
+     TIME FOR CALCULATION OF STIFFNESS MATRIX = 7.01000e-04
+     TIME FOR FACTORIZATION AND LOAD CASE SOLUTIONS = 2.37000e-04
+
+     T O T A L   S O L U T I O N   T I M E = 2.98100e-03
+
